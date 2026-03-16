@@ -1,73 +1,1001 @@
-# React + TypeScript + Vite
+# 🎸 GuitarRiff Helper — PRD (Product Requirements Document)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Версія документу:** 1.0  
+**Дата:** Березень 2026  
+**Тип продукту:** Веб-застосунок / PWA
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 1. Концепція продукту
 
-## React Compiler
+### 1.1 Проблема
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Гітаристи під час імпровізації часто стикаються з "творчим блоком":
 
-## Expanding the ESLint configuration
+- Знають, з яких нот хочуть почати фразу, але не знають, як її розвинути
+- Мають готовий рифф, але відчувають, що певна частина потребує зміни
+- Хочуть знайти нові, несподівані ходи в межах обраної тональності
+- Витрачають години на перебір варіантів "наосліп"
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 1.2 Рішення
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**GuitarRiff Helper** — інтерактивний інструмент, який:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Приймає початкові ноти через клік на віртуальному грифі гітари
+- Генерує 5-10 музично обґрунтованих варіантів продовження
+- Враховує тональність, гаму, ритмічний контекст та фізичну "грабельність" на грифі
+- Дозволяє миттєво прослухати та порівняти варіанти
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1.3 Ключова цінність
+
+> "Вся музика — це математика. Порахувати можливі комбінації і видати найбільш підходящі під параметри користувача — не проблема."
+
+Продукт перетворює нескінченний простір можливих нот у керований набір **музично релевантних** варіантів.
+
+---
+
+## 2. Цільова аудиторія
+
+### 2.1 Первинна аудиторія
+
+| Сегмент               | Опис                                           | Потреби                                           |
+| --------------------- | ---------------------------------------------- | ------------------------------------------------- |
+| **Гітаристи-аматори** | 1-5 років досвіду, вміють імпровізувати базово | Натхнення, нові ідеї, навчання                    |
+| **Напівпрофесіонали** | Грають у гуртах, пишуть музику                 | Швидкий пошук варіантів, подолання творчого блоку |
+| **Викладачі гітари**  | Навчають імпровізації                          | Демонстрація можливостей, генерація вправ         |
+
+### 2.2 Вторинна аудиторія
+
+- Продюсери та композитори (для скетчування ідей)
+- Бас-гітаристи (з адаптацією інтерфейсу)
+
+---
+
+## 3. Функціональні вимоги
+
+### 3.1 Модуль вводу (Input Module)
+
+#### 3.1.1 Віртуальний гриф гітари
+
+```
+Візуалізація:
+┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐
+│  0  │  1  │  2  │  3  │  4  │  5  │  6  │  7  │  8  │  9  │ 10  │ 11  │ ... 24
+├─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┼─────┤
+│  E  │  F  │ F#  │  G  │ G#  │  A  │ A#  │  B  │  C  │ C#  │  D  │ D#  │  ← 1 струна (тонка)
+│  B  │  C  │ C#  │  D  │ D#  │  E  │  F  │ F#  │  G  │ G#  │  A  │ A#  │  ← 2 струна
+│  G  │ G#  │  A  │ A#  │  B  │  C  │ C#  │  D  │ D#  │  E  │  F  │ F#  │  ← 3 струна
+│  D  │ D#  │  E  │  F  │ F#  │  G  │ G#  │  A  │ A#  │  B  │  C  │ C#  │  ← 4 струна
+│  A  │ A#  │  B  │  C  │ C#  │  D  │ D#  │  E  │  F  │ F#  │  G  │ G#  │  ← 5 струна
+│  E  │  F  │ F#  │  G  │ G#  │  A  │ A#  │  B  │  C  │ C#  │  D  │ D#  │  ← 6 струна (товста)
+└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Функціональність:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- [x] Клік по позиції = додавання ноти до поточного біту (акорд)
+- [x] Space/Enter = завершити біт і почати новий (дозволяє вводити послідовні ноти)
+- [x] Та ж нота може повторюватись у різних бітах (не toggle)
+- [x] Правий клік = видалення ноти з біту
+- [ ] Drag & drop для зміни порядку бітів
+- [x] Підсвічування нот обраної гами
+- [x] Відображення номерів ладів та назв нот
+- [x] Підтримка альтернативних строїв (Standard, Drop D, DADGAD, Open G, Open D, Half Step Down, Drop C)
+- [x] Клік по чіпу біту = вибір для редагування (додавання/видалення нот в акорді)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+#### 3.1.2 Альтернативні способи вводу
+
+| Спосіб              | Пріоритет | Опис                                         |
+| ------------------- | --------- | -------------------------------------------- |
+| Клік по грифу       | P0 (MVP)  | Основний спосіб                              |
+| Текстовий ввід      | P1        | Формат: `E5-G5-A5` або `0-3-5` (лади)        |
+| MIDI-ввід           | P2        | Підключення MIDI-контролера                  |
+| Аудіо-розпізнавання | P3        | Грати на реальній гітарі → розпізнавання нот |
+
+#### 3.1.3 Параметри генерації
+
+**Обов'язкові параметри:**
+
+```yaml
+Тональність:
+  type: select
+  options: [C, C#, D, D#, E, F, F#, G, G#, A, A#, B]
+  default: A
+  status: РЕАЛІЗОВАНО
+
+Гама/Лад:
+  type: select
+  options:
+    - Мажор (Іонійський)          # РЕАЛІЗОВАНО
+    - Натуральний мінор (Еолійський) # РЕАЛІЗОВАНО
+    - Пентатоніка мажорна          # РЕАЛІЗОВАНО
+    - Пентатоніка мінорна          # РЕАЛІЗОВАНО
+    - Блюзова гама                 # РЕАЛІЗОВАНО
+    - Дорійський                   # РЕАЛІЗОВАНО
+    - Фрігійський                  # РЕАЛІЗОВАНО
+    - Гармонічний мінор            # РЕАЛІЗОВАНО
+    - Лідійський                   # TODO
+    - Міксолідійський              # TODO
+    - Локрійський                  # TODO
+    - Мелодичний мінор             # TODO
+  default: Пентатоніка мінорна
+
+Строй гітари:
+  type: select
+  options:
+    - Standard (EADGBe)            # РЕАЛІЗОВАНО
+    - Drop D (DADGBe)              # РЕАЛІЗОВАНО
+    - DADGAD                       # РЕАЛІЗОВАНО
+    - Open G (DGDGBd)              # РЕАЛІЗОВАНО
+    - Open D (DADf#Ad)             # РЕАЛІЗОВАНО
+    - Half Step Down               # РЕАЛІЗОВАНО
+    - Drop C (CGCFAd)              # РЕАЛІЗОВАНО
+  default: Standard
+  note: Гриф автоматично перераховує ноти під обраний строй
+
+Стиль:
+  type: select
+  options:
+    - Neutral                      # РЕАЛІЗОВАНО
+    - Rock (preferLow, powerChords) # РЕАЛІЗОВАНО
+    - Metal (preferLow, chromaticRuns, powerChords) # РЕАЛІЗОВАНО
+    - Blues (bendWeight, shuffleFeel) # РЕАЛІЗОВАНО
+    - Jazz (chromaticRuns, preferHigh) # РЕАЛІЗОВАНО
+    - Funk (shuffleFeel)           # РЕАЛІЗОВАНО
+  default: Neutral
+  влияє_на: стратегії генерації, ритмічний feel, позиції на грифі
+
+Довжина генерації:
+  type: select
+  options: [3, 4, 6, 8, 12] нот
+  default: 4
+  status: РЕАЛІЗОВАНО
+
+Темп:
+  type: slider + number input
+  range: [40, 300] BPM
+  default: 120
+  status: РЕАЛІЗОВАНО
 ```
+
+**Ритм (побітовий контроль):**
+
+```yaml
+Кожен біт має індивідуальну тривалість:
+  type: per-beat duration picker (popup)
+  options: [1 (ціла), 1/2, 1/4, 1/8, 1/16, 3/8 (пунктирна)]
+  default: значення з "Default Duration" селектора
+  status: РЕАЛІЗОВАНО
+  ui: клік по мітці тривалості під бітом → popup з вибором
+
+Default Duration:
+  type: select
+  options: [Whole, Half, Quarter, 8th, 16th]
+  default: Quarter
+  status: РЕАЛІЗОВАНО
+
+Shuffle Feel:
+  type: auto (для Blues та Funk стилів)
+  description: автоматично застосовує swing-ритм (long-short) до згенерованих нот
+  status: РЕАЛІЗОВАНО
+```
+
+**Параметри генерації (Advanced):**
+
+```yaml
+Складність:
+  type: slider
+  levels:
+    - Легко (інтервали до квінти, без розтяжок)
+    - Середньо (стандартні патерни)
+    - Складно (широкі інтервали, швидкі переходи)
+  default: Середньо
+  status: TODO (частково реалізовано через playability scoring)
+
+Діапазон ладів:
+  type: range-slider
+  range: [0, 24]
+  default: [0, 15]
+  status: TODO
+
+Техніки:
+  type: multi-select
+  options:
+    - Hammer-on / Pull-off
+    - Slide
+    - Bend
+    - Vibrato
+    - Palm mute
+  default: [Hammer-on / Pull-off, Slide]
+  status: TODO
+```
+
+### 3.2 Модуль генерації (Generation Engine)
+
+#### 3.2.1 Алгоритмічний підхід
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    GENERATION PIPELINE (РЕАЛІЗОВАНО)             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  [Input Beats] → [Flatten to Notes] → [Scale Filter] →         │
+│                                                                 │
+│  → [7 Strategy Generators] → [Playability Check] →             │
+│                                                                 │
+│  → [Loop Smoothness] → [Rhythm Assignment] →                   │
+│                                                                 │
+│  → [Scoring & Ranking] → [Top 5 Results]                       │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Етап 1: Scale Filter** (РЕАЛІЗОВАНО)
+
+- Відфільтрувати всі ноти, що не входять в обрану гаму
+- Врахувати "проходящі" ноти (chromatic passing tones) з низьким пріоритетом
+- Chromatic strategy дозволяє хроматичні ноти з штрафом до score
+
+**Етап 2: Strategy-based Generation** (РЕАЛІЗОВАНО)
+
+7 стратегій генерації, кожна створює свій варіант:
+
+| Стратегія   | Опис                                          | Характер           |
+| ----------- | --------------------------------------------- | ------------------ |
+| `stepwise`  | Покрокове переміщення по гамі                 | Плавна мелодія     |
+| `skipUp`    | Стрибок вгору, потім кроки                    | Енергійний початок |
+| `skipDown`  | Стрибок вниз, потім кроки                     | Спадна фраза       |
+| `pendulum`  | Зміна напрямку кожну ноту                     | Хвилеподібний рух  |
+| `resolve`   | Рух до кореневої ноти                         | Завершення фрази   |
+| `chromatic` | Хроматичні ходи (півтони)                     | Jazz/Metal feel    |
+| `styleLick` | На основі стилю (powerChords, preferLow/High) | Стиль-специфічний  |
+
+**Етап 3: Playability Check** (РЕАЛІЗОВАНО)
+
+```python
+# Реалізовані обмеження:
+- Максимальна відстань по ладах: 5 (в межах одного кандидата)
+- Максимальний стрибок по струнах: 2
+- Scoring штрафує великі стрибки (fretDist > 5 або strDist > 2)
+- Scoring бонусує малі переходи (fretDist <= 3, strDist <= 1)
+```
+
+**Етап 4: Loop Smoothness** (РЕАЛІЗОВАНО - НОВА ФУНКЦІЯ)
+
+- Перевірка інтервалу між останньою згенерованою нотою та першою вхідною
+- Якщо стрибок > 7 півтонів — остання нота коригується
+- Знаходить найближчу ноту з гами, що знаходиться в межах 5 півтонів від першої вхідної
+- Забезпечує безшовне зациклювання при повторному відтворенні
+
+**Етап 5: Rhythm Assignment** (РЕАЛІЗОВАНО - ОНОВЛЕНО)
+
+- Кожен стиль має `rhythmVariety` (0-1) — ймовірність зміни тривалості ноти
+- Пул тривалостей: baseDur, baseDur*2, baseDur*0.5, baseDur\*1.5
+- Для Blues/Funk: shuffle feel (чергування long-short, коефіцієнт 1.33/0.67)
+- Кожен біт може мати індивідуальну тривалість через UI picker
+- Результат: згенеровані ноти мають різну довжину, а не однакову
+
+**Етап 6: Ranking & Selection** (РЕАЛІЗОВАНО)
+
+```
+Scoring formula (score 0-100):
+──────────────────────────────────────────────────
+Базовий score: 50
+
++ MelodicFlow:    +5 (інтервал ≤3), +3 (≤5), +1 (≤7), -3 (>7)
++ Playability:    +4 (fretDist≤3, strDist≤1), -5 (fretDist>5 або strDist>2)
++ Variety:        +3 за кожен унікальний pitch class
++ LoopSmoothness: +6 (loop інтервал ≤3), +3 (≤5), -5 (>8)  [НОВЕ]
++ StyleMatch:     +3 (використання типових позицій для стилю)
+──────────────────────────────────────────────────
+
+7 варіантів генеруються, сортуються за score, відображаються топ 5.
+```
+
+#### 3.2.2 Режими генерації
+
+| Режим         | Опис                                               | Use Case                   | Статус      |
+| ------------- | -------------------------------------------------- | -------------------------- | ----------- |
+| **Continue**  | Продовжити фразу після введених нот                | "Маю початок, що далі?"    | РЕАЛІЗОВАНО |
+| **Remix**     | Створити повністю новий рифф з тих самих нот       | "Хочу щось нове з цих нот" | РЕАЛІЗОВАНО |
+| **Fill Gap**  | Заповнити пропуск між двома точками                | "Як з'єднати ці дві ноти?" | TODO        |
+| **Variation** | Створити варіації існуючої фрази                   | "Хочу змінити цю частину"  | TODO        |
+| **Answer**    | Згенерувати "відповідь" на фразу (call & response) | Діалог між партіями        | TODO        |
+| **Harmonize** | Додати другий голос                                | Гармонізація мелодії       | TODO        |
+
+**Remix mode деталі:**
+
+- Витягує pitch classes з вхідних нот
+- Фільтрує через обрану гаму (мінімум 3 спільних ноти)
+- Починає з випадкової вхідної ноти у випадковій позиції на грифі
+- Генерує повністю нову послідовність з тим же набором нот
+- Не привʼязаний до оригінальної послідовності
+
+#### 3.2.3 Мультиінструментна генерація (НОВЕ)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                MULTI-INSTRUMENT PIPELINE                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Guitar input → [Strategy Gen] → Guitar continuation           │
+│                                                                 │
+│  Bass input?                                                    │
+│    Yes → [Strategy Gen (independent)] → Bass continuation      │
+│    No  → [Auto-generate from guitar root notes] → Bass line    │
+│                                                                 │
+│  Drums → Pass through (user-defined 16-step pattern)           │
+│                                                                 │
+│  All tracks → [Simultaneous playback] → Loop                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Інструменти:**
+
+| Інструмент        | Вхід         | Генерація                   | Звук               |
+| ----------------- | ------------ | --------------------------- | ------------------ |
+| Guitar (6 струн)  | Гриф (клік)  | 7 стратегій                 | Triangle wave      |
+| Bass (4 струни)   | Гриф (клік)  | Незалежна або авто з гітари | Sawtooth wave      |
+| Drums (6 голосів) | 16-step grid | Pass-through                | Synth (sine+noise) |
+
+**Drum voices:** Kick (sine 150→30Hz), Snare (noise), HiHat (high noise), Crash (wide noise), Tom1 (sine 200Hz), Tom2 (sine 150Hz)
+
+**Авто-бас:** Якщо бас не введений, але є гітара — автоматично створюється бас-лінія з кореневих нот гітарної партії (кожна N-та нота).
+
+### 3.3 Модуль виводу (Output Module)
+
+#### 3.3.1 Формати відображення результатів
+
+**Табулатура (пріоритет P0):**
+
+```
+e|------------------5--7--8--|
+B|-------------5--8----------|
+G|--------5--7---------------|
+D|--5--7---------------------|
+A|---------------------------|
+E|---------------------------|
+```
+
+**Візуалізація на грифі (пріоритет P0):**
+
+- Анімоване відображення послідовності на віртуальному грифі
+- Номери пальців (опціонально)
+- Напрямок руху (стрілки)
+
+**Нотний запис (пріоритет P2):**
+
+- Стандартна нотація на нотному стані
+- Використати бібліотеку VexFlow або аналог
+
+**MIDI/Аудіо превью (пріоритет P1):**
+
+- Програвання через Web Audio API
+- Вибір звуку: Clean, Overdrive, Acoustic
+- Контроль темпу
+- Метроном (опціонально)
+
+#### 3.3.2 Інтерфейс порівняння варіантів
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  GENERATED VARIATIONS                              [Regenerate] │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────────┐  ┌─────────────────────┐              │
+│  │ Variant 1    [▶][♡] │  │ Variant 2    [▶][♡] │              │
+│  │ ─────────────────── │  │ ─────────────────── │              │
+│  │ e|----5-7-8----     │  │ e|----5-8-10---     │              │
+│  │ B|--5-8--------     │  │ B|--5----------     │              │
+│  │                     │  │                     │              │
+│  │ Style: Bluesy       │  │ Style: Rock         │              │
+│  │ Difficulty: ●●○○    │  │ Difficulty: ●●●○    │              │
+│  └─────────────────────┘  └─────────────────────┘              │
+│                                                                 │
+│  ┌─────────────────────┐  ┌─────────────────────┐              │
+│  │ Variant 3    [▶][♡] │  │ Variant 4    [▶][♡] │              │
+│  │ ...                 │  │ ...                 │              │
+│  └─────────────────────┘  └─────────────────────┘              │
+│                                                                 │
+│  [Load More Variants]                                           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Функції:**
+
+- [x] Програти варіант одноразово (кнопка Play)
+- [x] Зациклене відтворення варіанту (кнопка Loop) — грає безперервно до натискання Stop
+- [x] Кнопка Stop для зупинки лупу
+- [x] Візуальна індикація варіанту що грає (помаранчева рамка)
+- [x] "Use" — взяти варіант як новий ввід для подальшої генерації
+- [x] Play Input — програти введені біти до генерації
+- [ ] Зберегти в обране (♡)
+- [ ] Порівняти два варіанти (split view + одночасне програвання)
+- [ ] Скопіювати як текст (табулатура)
+- [ ] Експорт (MIDI, Guitar Pro, PDF)
+
+### 3.4 Додаткові функції
+
+#### 3.4.1 Бібліотека збережених фраз
+
+```yaml
+Структура:
+  - Папки/теги для організації
+  - Пошук по тональності, стилю, тегам
+  - Історія генерацій (останні 50)
+```
+
+#### 3.4.2 Backing Track Integration (P2)
+
+- Вбудовані backing tracks по тональностях
+- Імпорт власних треків (mp3/wav)
+- Синхронізація темпу
+
+#### 3.4.3 Sharing & Community (P3)
+
+- Поділитися фразою (унікальне посилання)
+- Публічна бібліотека найкращих ліків
+- Рейтинг та коментарі
+
+---
+
+## 4. Нефункціональні вимоги
+
+### 4.1 Продуктивність
+
+| Метрика          | Вимога                        |
+| ---------------- | ----------------------------- |
+| Час генерації    | < 500ms для 10 варіантів      |
+| Час завантаження | < 3s (first contentful paint) |
+| Затримка аудіо   | < 50ms (Web Audio)            |
+| Офлайн-режим     | Базова функціональність (PWA) |
+
+### 4.2 Сумісність
+
+```
+Браузери:
+  - Chrome 90+ ✓
+  - Firefox 88+ ✓
+  - Safari 14+ ✓
+  - Edge 90+ ✓
+
+Пристрої:
+  - Desktop (1024px+): повна функціональність
+  - Tablet (768px+): адаптований гриф
+  - Mobile (320px+): вертикальний гриф, базові функції
+```
+
+### 4.3 Доступність (a11y)
+
+- Клавіатурна навігація по грифу
+- Screen reader support для табулатури
+- Високий контраст (опціонально)
+- Масштабування інтерфейсу
+
+---
+
+## 5. Технічна архітектура
+
+### 5.1 Рекомендований стек
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         FRONTEND                                │
+├─────────────────────────────────────────────────────────────────┤
+│  Framework:    React 18+ / Vue 3 / Svelte                       │
+│  State:        Zustand / Pinia / Svelte stores                  │
+│  Styling:      Tailwind CSS + Headless UI                       │
+│  Audio:        Tone.js (Web Audio wrapper)                      │
+│  Notation:     VexFlow (music notation rendering)               │
+│  Canvas:       Konva.js / Fabric.js (для грифа)                 │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                    GENERATION ENGINE                            │
+├─────────────────────────────────────────────────────────────────┤
+│  Option A: Client-side (WASM)                                   │
+│    - Rust/Go compiled to WebAssembly                            │
+│    - Переваги: офлайн, швидко, без серверних витрат             │
+│                                                                 │
+│  Option B: Server-side                                          │
+│    - Python (music21 library) / Node.js                         │
+│    - Переваги: легше оновлювати логіку, ML-моделі               │
+│                                                                 │
+│  Рекомендація: Гібрид                                           │
+│    - Базова генерація: client-side (WASM)                       │
+│    - ML-покращення: server-side API                             │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                      BACKEND (якщо потрібен)                    │
+├─────────────────────────────────────────────────────────────────┤
+│  API:          FastAPI / Express                                │
+│  Database:     PostgreSQL (users, saved phrases)                │
+│  Auth:         Supabase / Firebase Auth                         │
+│  Storage:      S3 / Cloudflare R2 (аудіо файли)                 │
+│  Hosting:      Vercel / Railway / Fly.io                        │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 5.2 Структура даних
+
+```typescript
+// Нота на грифі
+interface GuitarNote {
+  string: number // 0-5 (0 = найтонша, 5 = найтовща)
+  fret: number // 0-15 (розширюється)
+  midi: number // MIDI номер (розраховується: tuning[string] + fret)
+}
+
+// Біт — одиниця часу (може містити акорд)
+interface Beat {
+  notes: GuitarNote[] // 1+ нот = одночасне звучання (акорд)
+  duration: number // тривалість відносно цілої: 1, 0.5, 0.25, 0.125, 0.0625, 0.375
+}
+
+// Стан застосунку
+interface AppState {
+  beats: Beat[] // введена послідовність бітів
+  currentBeatIdx: number // -1 = наступний клік створює новий біт, >=0 = редагування біту
+  key: number // 0-11 (C=0, A=9)
+  scale: ScaleType // 'major' | 'minor' | 'minorPentatonic' | 'blues' | ...
+  tuning: TuningType // 'standard' | 'dropD' | 'dadgad' | 'openG' | ...
+  style: MusicStyle // 'neutral' | 'rock' | 'metal' | 'blues' | 'jazz' | 'funk'
+  genLength: number // 3 | 4 | 6 | 8 | 12
+  tempo: number // 40-300 BPM
+  defaultDuration: number // тривалість для нових бітів
+  results: GenerationResult[]
+  loopTimer: number | null // ID таймера для лупу
+  playingIdx: number // -1 або індекс варіанту що грає
+}
+
+// Конфіг строю
+interface TuningConfig {
+  name: string
+  midi: number[] // [string0_midi, ..., string5_midi]
+  labels: string[] // ['e', 'B', 'G', 'D', 'A', 'E']
+}
+
+// Конфіг стилю
+interface StyleConfig {
+  bendWeight: number // 0-1
+  powerChords: boolean // бонус за інтервал квінти
+  chromaticRuns: boolean // бонус за хроматичні ходи
+  preferLow: boolean // бонус за нижні струни
+  preferHigh: boolean // бонус за верхні струни
+  shuffleFeel: boolean // auto shuffle ритм
+}
+
+// Результат генерації
+interface GenerationResult {
+  id: number
+  inputBeats: Beat[] // копія вхідних бітів
+  genBeats: Beat[] // згенеровані біти
+  fullBeats: Beat[] // inputBeats + genBeats
+  score: number // 0-100
+}
+
+// Налаштування генерації
+interface GenerationConfig {
+  key: number
+  scale: ScaleType
+  tuning: TuningType
+  style: MusicStyle
+  length: number // кількість нот для генерації
+  tempo: number
+  defaultDuration: number
+  // TODO:
+  mode?: 'continue' | 'fill' | 'variation' | 'answer'
+  difficulty?: 'easy' | 'medium' | 'hard'
+  fretRange?: [number, number]
+  allowedTechniques?: Technique[]
+}
+```
+
+### 5.3 Алгоритм генерації (деталізація)
+
+```python
+# Спрощений псевдокод основного алгоритму
+
+class RiffGenerator:
+    def __init__(self, config: GenerationConfig):
+        self.scale = Scale(config.key, config.scale)
+        self.style_patterns = load_patterns(config.style)
+        self.config = config
+
+    def generate(self, input_notes: List[Note], count: int = 10) -> List[Result]:
+        # 1. Аналіз вхідної послідовності
+        context = self.analyze_input(input_notes)
+
+        # 2. Генерація кандидатів
+        candidates = []
+
+        # 2.1 Pattern-based generation
+        for pattern in self.style_patterns:
+            if pattern.matches_context(context):
+                candidates.extend(pattern.generate_variations(
+                    context,
+                    self.scale,
+                    self.config.length
+                ))
+
+        # 2.2 Interval-based generation
+        candidates.extend(self.generate_by_intervals(context))
+
+        # 2.3 Random walk within scale (для різноманітності)
+        candidates.extend(self.random_walk(context, count=20))
+
+        # 3. Фільтрація
+        valid_candidates = [
+            c for c in candidates
+            if self.is_playable(c) and self.fits_fret_range(c)
+        ]
+
+        # 4. Scoring
+        scored = [(c, self.calculate_score(c, context)) for c in valid_candidates]
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        # 5. Diversification (уникнути 10 майже однакових варіантів)
+        final = self.diversify(scored, count)
+
+        return final
+
+    def analyze_input(self, notes: List[Note]) -> Context:
+        return Context(
+            intervals=[notes[i+1].pitch - notes[i].pitch for i in range(len(notes)-1)],
+            direction=self.get_melodic_direction(notes),
+            register=self.get_register(notes),
+            last_note=notes[-1],
+            chord_implications=self.detect_implied_chords(notes)
+        )
+
+    def calculate_score(self, candidate: List[Note], context: Context) -> float:
+        return (
+            0.25 * self.melodic_flow_score(candidate, context) +
+            0.25 * self.playability_score(candidate) +
+            0.20 * self.style_match_score(candidate) +
+            0.15 * self.resolution_score(candidate) +
+            0.15 * self.originality_score(candidate, context)
+        )
+```
+
+---
+
+## 6. UI/UX Специфікація
+
+### 6.1 Основні екрани
+
+#### Екран 1: Головний (Workspace)
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│  GuitarRiff Helper                                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌─── PARAMETERS ───────────────────────────────────────────────────┐  │
+│  │  Key: [A ▼]  Scale: [Minor Pentatonic ▼]  Tuning: [Standard ▼]  │  │
+│  │  Style: [Blues ▼]  Generate: [4 notes ▼]                         │  │
+│  │  Tempo: [====●======] 120 BPM  [120]   Duration: [Quarter ▼]    │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  Click = add notes to current beat (chord).                             │
+│  Space / Enter = finish beat & start next. Right-click = remove note.   │
+│                                                                         │
+│  ┌─── FRETBOARD (15 frets) ─────────────────────────────────────────┐  │
+│  │    0    1    2    3    4    5    6    7   ...  12  13  14  15    │  │
+│  │  ┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬──│  │
+│  │  │    │    │    │    │    │ ●₁ │    │    │ ●₃ │    │    │    │  │  │
+│  │  │    │    │    │    │    │ ○  │    │    │ ○  │    │    │    │  │  │
+│  │  │    │    │    │    │    │ ○  │    │ ○  │    │    │    │    │  │  │
+│  │  │    │    │    │    │    │ ○  │    │ ○  │    │    │    │    │  │  │
+│  │  │    │    │    │    │    │ ●₂ │    │ ○  │    │    │    │    │  │  │
+│  │  │    │    │    │    │    │ ○  │    │    │ ○  │    │    │    │  │  │
+│  │  └────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴────┴──│  │
+│  │  ● = selected note (з номером біту)  ○ = scale note              │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+│  Input Beats:                                                           │
+│  ┌─────┐   ┌─────────┐   ┌─────┐                                      │
+│  │ A4  │ → │ A4 + E4 │ → │ C5  │  (beat chips, click to edit)         │
+│  │ 1/4 │   │  1/8    │   │ 1/4 │  (click duration to change)          │
+│  └─────┘   └─────────┘   └─────┘                                      │
+│                                                                         │
+│  [Generate Riffs] [Play Input] [Clear] [Stop]                           │
+│                                                                         │
+│  ┌─── RESULTS ──────────────────────────────────────────────────────┐  │
+│  │ ┌──────────────────┐ ┌──────────────────┐                        │  │
+│  │ │ Variant 1         │ │ Variant 2         │                       │  │
+│  │ │ [Play][Loop][Use] │ │ [Play][Loop][Use] │                       │  │
+│  │ │ Score: 78         │ │ Score: 72         │                       │  │
+│  │ │  e|--5--8--5--8-| │ │  e|--5--10-8--5-| │                      │  │
+│  │ │  B|-------------| │ │  B|--------------| │                      │  │
+│  │ │  ...             │ │  ...              │ │                      │  │
+│  │ └──────────────────┘ └──────────────────┘                        │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 6.2 Мобільна адаптація
+
+```
+┌─────────────────────────┐
+│  🎸 GuitarRiff Helper   │
+├─────────────────────────┤
+│  [Am] [Pentatonic] [6]  │
+├─────────────────────────┤
+│                         │
+│  ┌─────────────────┐    │
+│  │   FRETBOARD     │    │
+│  │   (vertical,    │    │
+│  │    scrollable)  │    │
+│  │                 │    │
+│  │  ═══════════    │    │
+│  │  ═══════════    │    │
+│  │  ═══════════    │    │
+│  │  ═══════════    │    │
+│  │  ═══════════    │    │
+│  │  ═══════════    │    │
+│  └─────────────────┘    │
+│                         │
+│  Input: A5→C5→D5        │
+│                         │
+│  [ 🎲 GENERATE ]        │
+│                         │
+│  ┌───────────────────┐  │
+│  │ Var 1  [▶] [♡]    │  │
+│  │ e|--5-7-8--       │  │
+│  └───────────────────┘  │
+│  ┌───────────────────┐  │
+│  │ Var 2  [▶] [♡]    │  │
+│  │ e|--5-8-10-       │  │
+│  └───────────────────┘  │
+│                         │
+└─────────────────────────┘
+```
+
+### 6.3 Інтерактивність грифа
+
+**Взаємодії:**
+
+| Дія                           | Desktop              | Mobile            | Статус                |
+| ----------------------------- | -------------------- | ----------------- | --------------------- |
+| Додати ноту до поточного біту | Click                | Tap               | РЕАЛІЗОВАНО           |
+| Завершити біт / наступний біт | Space / Enter        | Кнопка (TODO)     | РЕАЛІЗОВАНО (desktop) |
+| Видалити ноту з біту          | Right-click          | Long press (TODO) | РЕАЛІЗОВАНО (desktop) |
+| Превʼю ноти при кліку         | Авто (triangle wave) | Авто              | РЕАЛІЗОВАНО           |
+| Вибрати біт для редагування   | Клік по чіпу біту    | Клік по чіпу      | РЕАЛІЗОВАНО           |
+| Zoom                          | Scroll               | Pinch             | TODO                  |
+| Pan (якщо масштабовано)       | Drag                 | Drag              | TODO                  |
+
+**Візуальний фідбек:** (РЕАЛІЗОВАНО)
+
+- Hover: підсвічування позиції
+- Selected: червоний маркер + номер біту
+- Scale notes: напівпрозорі фіолетові маркери
+- Current beat: чіп біту підсвічується червоною рамкою
+- Playing variant: картка підсвічується помаранчевою рамкою
+
+---
+
+## 7. MVP Scope (Версія 1.0)
+
+### 7.1 Що входить в MVP
+
+✅ **Включено (РЕАЛІЗОВАНО в прототипі):**
+
+- [x] Віртуальний гриф (горизонтальний, 15 ладів)
+- [x] Вибір тональності та гами (8 гам: мажор, мінор, пентатоніки, блюз, дорійський, фрігійський, гармонічний мінор)
+- [x] Режим "Continue" (продовжити фразу)
+- [x] Генерація 5 варіантів (з 7 стратегій)
+- [x] Відображення у форматі табулатури (з підтримкою акордів)
+- [x] Аудіо превью (Web Audio API, triangle wave)
+- [x] Playability scoring
+- [x] Адаптивний дизайн (desktop + mobile)
+- [x] **Альтернативні строї** (7 варіантів)
+- [x] **Стилі генерації** (Neutral, Rock, Metal, Blues, Jazz, Funk)
+- [x] **Побітовий ввід з акордами** (Space/Enter для нового біту)
+- [x] **Кастомний ритм** (кожен біт має індивідуальну тривалість)
+- [x] **Shuffle feel** (автоматично для Blues/Funk)
+- [x] **Зациклене відтворення** (Loop + Stop)
+- [x] **Loop-aware генерація** (безшовне зациклювання)
+- [x] **Play Input** (програти введені біти)
+- [x] **"Use" варіант** (взяти як новий ввід)
+- [x] **Темп** (повзунок + поле, 40-300 BPM)
+
+### 7.2 Що НЕ входить в MVP
+
+❌ **Відкладено:**
+
+- Режими Fill Gap, Variation, Answer, Harmonize
+- Лідійський, Міксолідійський, Локрійський, Мелодичний мінор
+- MIDI ввід/вивід
+- Аудіо розпізнавання
+- Нотний запис (VexFlow)
+- Бібліотека збережених фраз
+- Sharing & Community
+- Backing tracks
+- Drag & drop для зміни порядку бітів
+- Difficulty slider
+- Fret range slider
+- Техніки (hammer-on, bend, slide як окрема функція)
+- Вибір звуку (Clean, Overdrive, Acoustic)
+- Метроном
+
+### 7.3 Definition of Done (MVP)
+
+```
+Користувач може:                                       Статус:
+1. Відкрити веб-застосунок                              ✅
+2. Обрати тональність, гаму, строй та стиль            ✅
+3. Клікнути по грифу, щоб ввести ноти/акорди            ✅
+4. Задати ритм (тривалість) для кожного біту            ✅
+5. Натиснути "Generate"                                 ✅
+6. Побачити 5 варіантів продовження у табулатурі         ✅
+7. Програти кожен варіант (одноразово або в циклі)      ✅
+8. Зупинити програвання кнопкою Stop                    ✅
+9. Використати варіант як новий ввід                     ✅
+10. Весь процес займає < 30 секунд                      ✅
+```
+
+---
+
+## 8. Roadmap
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         ROADMAP                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  Phase 1: MVP (Month 1-2)                                       │
+│  ════════════════════════                                       │
+│  • Core fretboard interface                                     │
+│  • Basic generation algorithm                                   │
+│  • Tab output + audio preview                                   │
+│  • Responsive design                                            │
+│                                                                 │
+│  Phase 2: Enhanced Generation (Month 3-4)                       │
+│  ════════════════════════════════════════                       │
+│  • All modes (Fill, Variation, Answer)                          │
+│  • Full scale library                                           │
+│  • Style-aware generation                                       │
+│  • Improved playability scoring                                 │
+│                                                                 │
+│  Phase 3: Pro Features (Month 5-6)                              │
+│  ════════════════════════════════                               │
+│  • User accounts & saved phrases                                │
+│  • MIDI import/export                                           │
+│  • Backing track integration                                    │
+│  • Guitar Pro export                                            │
+│                                                                 │
+│  Phase 4: Community & AI (Month 7+)                             │
+│  ═══════════════════════════════════                            │
+│  • Sharing & public library                                     │
+│  • ML-enhanced generation                                       │
+│  • Audio recognition input                                      │
+│  • Mobile apps (iOS/Android)                                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 9. Конкурентний аналіз
+
+| Продукт        | Сильні сторони                    | Слабкі сторони                 | Наша перевага               |
+| -------------- | --------------------------------- | ------------------------------ | --------------------------- |
+| **Hookpad**    | Теорія музики, chord progressions | Не гітаро-специфічний, дорогий | Фокус на грифі, playability |
+| **Guitar Pro** | Індустріальний стандарт, таби     | Не генерує, тільки редактор    | Генерація варіантів         |
+| **Soundslice** | Чудова візуалізація               | Немає генерації                | AI-powered suggestions      |
+| **ChordAI**    | Розпізнавання акордів             | Тільки акорди, не мелодії      | Мелодичні фрази             |
+| **Amper/AIVA** | AI музика                         | Повні треки, не контроль       | Гранулярний контроль        |
+
+**Унікальна позиція:** Ми — єдиний інструмент, що поєднує:
+
+- Гітаро-специфічний інтерфейс (гриф)
+- Генерацію з урахуванням playability
+- Контекстну генерацію (продовження, заповнення)
+- Фокус на імпровізації, а не композиції
+
+---
+
+## 10. Метрики успіху
+
+### 10.1 Продуктові метрики
+
+| Метрика                           | Target (MVP) | Target (6 міс) |
+| --------------------------------- | ------------ | -------------- |
+| Щоденні активні користувачі (DAU) | 100          | 1,000          |
+| Генерацій на сесію                | 5+           | 10+            |
+| Retention D7                      | 20%          | 35%            |
+| NPS                               | 30+          | 50+            |
+
+### 10.2 Технічні метрики
+
+| Метрика                | Target  |
+| ---------------------- | ------- |
+| Час генерації (p95)    | < 500ms |
+| Error rate             | < 1%    |
+| Uptime                 | 99.5%   |
+| Lighthouse Performance | 90+     |
+
+---
+
+## 11. Ризики та мітигація
+
+| Ризик                                               | Ймовірність | Вплив    | Мітигація                                         |
+| --------------------------------------------------- | ----------- | -------- | ------------------------------------------------- |
+| Генерація "нецікавих" варіантів                     | Висока      | Високий  | A/B тестування алгоритмів, user feedback loop     |
+| Складність UI для новачків                          | Середня     | Середній | Онбординг, tooltips, "простий режим"              |
+| Проблеми з latency на слабких пристроях             | Середня     | Середній | WASM оптимізація, fallback до серверної генерації |
+| Юридичні питання (генерація схожа на існуючі пісні) | Низька      | Високий  | Disclaimer, унікальність scoring                  |
+
+---
+
+## 12. Команда та ресурси
+
+### Мінімальна команда для MVP:
+
+| Роль                 | Кількість | Відповідальність          |
+| -------------------- | --------- | ------------------------- |
+| Frontend Developer   | 1         | UI, гриф, інтеграція      |
+| Algorithm Developer  | 1         | Генератор, музична логіка |
+| Designer (part-time) | 0.5       | UI/UX, брендинг           |
+
+### Інструменти:
+
+- Design: Figma
+- Project: Linear / Notion
+- Code: GitHub
+- CI/CD: GitHub Actions + Vercel
+
+---
+
+## 13. Наступні кроки
+
+1. **Тиждень 1:** Дизайн UI (Figma mockups)
+2. **Тиждень 2-3:** Прототип грифа (інтерактивний)
+3. **Тиждень 4-5:** Базовий алгоритм генерації
+4. **Тиждень 6-7:** Інтеграція + аудіо
+5. **Тиждень 8:** Тестування, polish, деплой MVP
+
+---
+
+## Додаток A: Глосарій
+
+| Термін           | Визначення                                    |
+| ---------------- | --------------------------------------------- |
+| **Лад**          | Вертикальний сегмент грифа гітари             |
+| **Гама (Scale)** | Набір нот, що "звучать добре" разом           |
+| **Табулатура**   | Нотація для гітари (цифри = лади)             |
+| **Playability**  | Наскільки легко фізично зіграти послідовність |
+| **Passing tone** | Нота поза гамою, що з'єднує дві ноти в гамі   |
+| **Lick**         | Коротка музична фраза (2-8 нот)               |
+| **Riff**         | Повторювана музична фраза                     |
+
+---
+
+## Додаток B: Приклади гам
+
+```
+A Minor Pentatonic (box 1):
+e|----------------5--8--|
+B|-------------5--8-----|
+G|----------5--7--------|
+D|-------5--7-----------|
+A|----5--7--------------|
+E|-5--8-----------------|
+
+A Blues Scale:
+e|-------------------5--8--|
+B|----------------5--8-----|
+G|----------5--6--7--------|
+D|-------5--7--------------|
+A|----5--6--7--------------|
+E|-5--8--------------------|
+```
+
+---
+
+_Документ підготовлено для внутрішнього використання. Версія 1.0_
