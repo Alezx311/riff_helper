@@ -1,0 +1,135 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+
+.app-header { background: #16213e; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f3460; }
+.app-header h1 { font-size: 1.3rem; color: #e94560; }
+
+.controls { display: flex; gap: 10px; padding: 10px 24px; background: #16213e; flex-wrap: wrap; align-items: flex-end; }
+.control-group { display: flex; flex-direction: column; gap: 3px; }
+.control-group label { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+
+select, button, input { background: #0f3460; color: #e0e0e0; border: 1px solid #533483; padding: 5px 8px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+select:hover, button:hover { border-color: #e94560; }
+input { cursor: text; }
+
+.btn-primary { background: #e94560; color: white; border: none; padding: 7px 18px; font-size: 0.9rem; font-weight: 600; border-radius: 7px; }
+.btn-primary:hover { background: #c73652; }
+.btn-primary:disabled { background: #555; cursor: not-allowed; }
+.btn-outline { background: transparent; border: 1px solid #e94560; color: #e94560; padding: 7px 12px; border-radius: 7px; }
+.btn-outline:hover { background: rgba(233,69,96,0.1); }
+.btn-stop { background: #ff6b35; color: white; border: none; padding: 7px 12px; border-radius: 7px; font-weight: 600; }
+.btn-stop:hover { background: #e55a2b; }
+.btn-sm { background: #0f3460; border: 1px solid #533483; color: #e0e0e0; padding: 3px 9px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
+.btn-sm:hover { background: #533483; }
+
+/* Instrument tabs */
+.instrument-tabs { display: flex; gap: 0; padding: 0 24px; background: #16213e; }
+.instrument-tab { padding: 8px 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: #888; transition: all 0.2s; }
+.instrument-tab:hover { color: #e0e0e0; }
+.instrument-tab.active { color: #e94560; border-bottom-color: #e94560; }
+.tab-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-left: 5px; }
+.tab-dot.has-data { background: #8bc34a; }
+
+.beat-mode-info { font-size: 0.7rem; color: #888; padding: 4px 24px; }
+.beat-mode-info kbd { background: #0f3460; padding: 1px 4px; border-radius: 3px; border: 1px solid #533483; font-size: 0.65rem; }
+
+/* Fretboard */
+.fretboard-container { padding: 12px 24px; overflow-x: auto; }
+.fretboard { display: grid; gap: 0; min-width: 750px; position: relative; }
+.fret-number { text-align: center; font-size: 0.65rem; color: #666; padding: 2px 0; font-weight: 600; }
+.string-label { display: flex; align-items: center; justify-content: center; font-weight: 700; color: #888; font-size: 0.75rem; }
+.fret-cell { height: 30px; border-right: 1px solid #444; border-bottom: 1px solid #888; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background 0.15s; }
+.fret-cell:hover { background: rgba(233,69,96,0.15); }
+.fret-cell.nut { border-right: 3px solid #aaa; }
+.note-marker { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 600; position: relative; z-index: 2; }
+.note-marker.scale-note { background: rgba(83,52,131,0.4); color: #b8a9c9; }
+.note-marker.selected { background: #e94560; color: white; box-shadow: 0 0 6px rgba(233,69,96,0.6); }
+.note-marker.selected::after { content: attr(data-order); position: absolute; top: -6px; right: -6px; background: #533483; color: white; width: 12px; height: 12px; border-radius: 50%; font-size: 0.45rem; display: flex; align-items: center; justify-content: center; }
+.dot-marker { display: none; position: absolute; bottom: -4px; width: 4px; height: 4px; border-radius: 50%; background: #444; }
+
+/* Drum grid */
+.drum-grid { display: grid; gap: 2px; padding: 12px 24px; }
+.drum-row-label { font-size: 0.7rem; color: #888; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-weight: 600; }
+.drum-cell { width: 30px; height: 28px; background: #0f3460; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; transition: all 0.15s; }
+.drum-cell:hover { background: #1a4080; }
+.drum-cell.active { background: #e94560; color: white; }
+.drum-step-num { font-size: 0.55rem; color: #555; text-align: center; }
+
+/* Input display */
+.input-section { padding: 6px 24px; }
+.input-label { color: #888; font-size: 0.8rem; margin-bottom: 4px; }
+.beats-container { display: flex; gap: 3px; flex-wrap: wrap; align-items: flex-start; min-height: 32px; }
+.beat-chip { background: #16213e; border: 1px solid #533483; border-radius: 7px; padding: 3px 7px; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 44px; position: relative; font-size: 0.65rem; cursor: pointer; }
+.beat-chip.current-beat { border-color: #e94560; box-shadow: 0 0 5px rgba(233,69,96,0.4); }
+.beat-notes { display: flex; flex-direction: column; gap: 0; align-items: center; }
+.beat-note { font-size: 0.65rem; font-weight: 600; color: #e94560; }
+.beat-duration { font-size: 0.55rem; color: #888; cursor: pointer; }
+.beat-duration:hover { color: #e94560; }
+.beat-remove { position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; background: #e94560; color: white; border-radius: 50%; font-size: 0.45rem; display: none; align-items: center; justify-content: center; cursor: pointer; border: none; padding: 0; line-height: 1; }
+.beat-chip:hover .beat-remove { display: flex; }
+.beat-arrow { color: #555; font-size: 0.7rem; align-self: center; }
+.empty-input { color: #555; font-size: 0.8rem; padding: 6px 0; }
+
+/* Actions */
+.actions { padding: 6px 24px 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.gen-checkboxes { display: flex; gap: 8px; align-items: center; }
+.gen-checkbox { display: flex; gap: 3px; align-items: center; font-size: 0.7rem; color: #aaa; cursor: pointer; }
+.gen-checkbox input { width: 14px; height: 14px; cursor: pointer; }
+
+/* Main layout with mixer sidebar */
+.main-layout { display: flex; gap: 0; }
+.main-content { flex: 1; min-width: 0; }
+
+/* Results */
+.results { padding: 0 24px 20px; }
+.results h2 { font-size: 0.95rem; color: #888; margin-bottom: 8px; }
+.results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 10px; }
+.variant-card { background: #16213e; border: 1px solid #0f3460; border-radius: 9px; padding: 12px; transition: border-color 0.2s; }
+.variant-card:hover { border-color: #533483; }
+.variant-card.playing { border-color: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,0.3); }
+.variant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.variant-title { font-weight: 600; color: #e94560; font-size: 0.85rem; }
+.variant-meta { font-size: 0.65rem; color: #888; margin-bottom: 6px; }
+.variant-actions { display: flex; gap: 5px; }
+.variant-inst-play { display: flex; gap: 4px; margin-bottom: 6px; }
+.btn-inst-play { font-size: 0.6rem !important; padding: 2px 6px !important; }
+.guitar-play { border-color: #8bc34a !important; color: #8bc34a !important; }
+.bass-play { border-color: #ff9800 !important; color: #ff9800 !important; }
+.drums-play { border-color: #03a9f4 !important; color: #03a9f4 !important; }
+
+.tab-display { font-family: 'Courier New', monospace; font-size: 0.7rem; line-height: 1.25; background: #0d1b2a; padding: 8px; border-radius: 5px; white-space: pre; overflow-x: auto; color: #8bc34a; margin-top: 4px; }
+.tab-display.bass-tab { color: #ff9800; }
+.tab-display.drum-tab { color: #03a9f4; }
+.tab-label { font-size: 0.6rem; color: #666; margin-top: 6px; text-transform: uppercase; }
+
+.difficulty-dots { display: inline-flex; gap: 2px; }
+.difficulty-dots .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
+.difficulty-dots .dot.filled { background: #e94560; }
+.placeholder { text-align: center; padding: 25px; color: #555; font-size: 0.85rem; }
+
+.duration-picker { position: fixed; background: #16213e; border: 1px solid #533483; border-radius: 7px; padding: 6px; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,0.5); display: flex; gap: 3px; }
+.duration-picker button { padding: 3px 7px; font-size: 0.7rem; border-radius: 4px; }
+.duration-picker button.active { background: #e94560; border-color: #e94560; }
+
+/* Mixer panel */
+.mixer-panel { width: 240px; background: #16213e; border-left: 1px solid #0f3460; padding: 12px; flex-shrink: 0; }
+.mixer-title { font-size: 0.8rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #0f3460; }
+.mixer-track { margin-bottom: 14px; }
+.mixer-track-label { font-size: 0.75rem; font-weight: 600; margin-bottom: 5px; }
+.mixer-controls { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.mixer-volume { width: 60px; cursor: pointer; height: 4px; }
+.mixer-vol-val { font-size: 0.6rem; color: #888; min-width: 28px; }
+.mixer-btn { width: 22px; height: 22px; padding: 0; font-size: 0.6rem; font-weight: 700; border-radius: 3px; display: flex; align-items: center; justify-content: center; }
+.mixer-btn.active-mute { background: #e94560; border-color: #e94560; color: white; }
+.mixer-btn.active-solo { background: #ff9800; border-color: #ff9800; color: white; }
+.mixer-sample-select { font-size: 0.6rem; padding: 2px 4px; max-width: 100px; margin-top: 4px; width: 100%; }
+.mixer-sample-label { font-size: 0.6rem; color: #666; margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .controls { gap: 5px; padding: 6px 10px; }
+  .fretboard-container { padding: 6px 10px; }
+  .results-grid { grid-template-columns: 1fr; }
+  .input-section, .actions { padding-left: 10px; padding-right: 10px; }
+  .main-layout { flex-direction: column; }
+  .mixer-panel { width: 100%; border-left: none; border-top: 1px solid #0f3460; }
+}

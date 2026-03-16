@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GuitarRiff Helper</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+
+  header { background: #16213e; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f3460; }
+  header h1 { font-size: 1.3rem; color: #e94560; }
+
+  .controls { display: flex; gap: 10px; padding: 10px 24px; background: #16213e; flex-wrap: wrap; align-items: flex-end; }
+  .control-group { display: flex; flex-direction: column; gap: 3px; }
+  .control-group label { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  select, button, input { background: #0f3460; color: #e0e0e0; border: 1px solid #533483; padding: 5px 8px; border-radius: 5px; font-size: 0.8rem; cursor: pointer; }
+  select:hover, button:hover { border-color: #e94560; }
+  input { cursor: text; }
+
+  .btn-primary { background: #e94560; color: white; border: none; padding: 7px 18px; font-size: 0.9rem; font-weight: 600; border-radius: 7px; }
+  .btn-primary:hover { background: #c73652; }
+  .btn-primary:disabled { background: #555; cursor: not-allowed; }
+  .btn-outline { background: transparent; border: 1px solid #e94560; color: #e94560; padding: 7px 12px; border-radius: 7px; }
+  .btn-outline:hover { background: rgba(233,69,96,0.1); }
+  .btn-stop { background: #ff6b35; color: white; border: none; padding: 7px 12px; border-radius: 7px; font-weight: 600; display: none; }
+  .btn-stop:hover { background: #e55a2b; }
+  .btn-stop.visible { display: inline-block; }
+  .btn-sm { background: #0f3460; border: 1px solid #533483; color: #e0e0e0; padding: 3px 9px; border-radius: 5px; cursor: pointer; font-size: 0.7rem; }
+  .btn-sm:hover { background: #533483; }
+
+  /* Instrument tabs */
+  .instrument-tabs { display: flex; gap: 0; padding: 0 24px; background: #16213e; }
+  .instrument-tab { padding: 8px 18px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: #888; transition: all 0.2s; }
+  .instrument-tab:hover { color: #e0e0e0; }
+  .instrument-tab.active { color: #e94560; border-bottom-color: #e94560; }
+  .instrument-tab .tab-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-left: 5px; }
+  .instrument-tab .tab-dot.has-data { background: #8bc34a; }
+
+  .beat-mode-info { font-size: 0.7rem; color: #888; padding: 4px 24px; }
+  .beat-mode-info kbd { background: #0f3460; padding: 1px 4px; border-radius: 3px; border: 1px solid #533483; font-size: 0.65rem; }
+
+  /* Fretboard & Drum grid */
+  .fretboard-container { padding: 12px 24px; overflow-x: auto; }
+  .fretboard { display: grid; gap: 0; min-width: 750px; position: relative; }
+  .fret-number { text-align: center; font-size: 0.65rem; color: #666; padding: 2px 0; font-weight: 600; }
+  .string-label { display: flex; align-items: center; justify-content: center; font-weight: 700; color: #888; font-size: 0.75rem; }
+  .fret-cell { height: 30px; border-right: 1px solid #444; border-bottom: 1px solid #888; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: background 0.15s; }
+  .fret-cell:hover { background: rgba(233,69,96,0.15); }
+  .fret-cell.nut { border-right: 3px solid #aaa; }
+  .fret-cell .note-marker { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; font-weight: 600; position: relative; z-index: 2; }
+  .fret-cell .note-marker.scale-note { background: rgba(83,52,131,0.4); color: #b8a9c9; }
+  .fret-cell .note-marker.selected { background: #e94560; color: white; box-shadow: 0 0 6px rgba(233,69,96,0.6); }
+  .fret-cell .note-marker.selected::after { content: attr(data-order); position: absolute; top: -6px; right: -6px; background: #533483; color: white; width: 12px; height: 12px; border-radius: 50%; font-size: 0.45rem; display: flex; align-items: center; justify-content: center; }
+  .dot-marker { display: none; position: absolute; bottom: -4px; width: 4px; height: 4px; border-radius: 50%; background: #444; }
+
+  /* Drum grid */
+  .drum-grid { display: grid; gap: 2px; padding: 12px 24px; }
+  .drum-row-label { font-size: 0.7rem; color: #888; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-weight: 600; }
+  .drum-cell { width: 30px; height: 28px; background: #0f3460; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; transition: all 0.15s; }
+  .drum-cell:hover { background: #1a4080; }
+  .drum-cell.active { background: #e94560; color: white; }
+  .drum-step-num { font-size: 0.55rem; color: #555; text-align: center; }
+
+  /* Input display */
+  .input-section { padding: 6px 24px; }
+  .input-label { color: #888; font-size: 0.8rem; margin-bottom: 4px; }
+  .beats-container { display: flex; gap: 3px; flex-wrap: wrap; align-items: flex-start; min-height: 32px; }
+  .beat-chip { background: #16213e; border: 1px solid #533483; border-radius: 7px; padding: 3px 7px; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 44px; position: relative; font-size: 0.65rem; }
+  .beat-chip.current-beat { border-color: #e94560; box-shadow: 0 0 5px rgba(233,69,96,0.4); }
+  .beat-chip .beat-notes { display: flex; flex-direction: column; gap: 0; align-items: center; }
+  .beat-chip .beat-note { font-size: 0.65rem; font-weight: 600; color: #e94560; }
+  .beat-chip .beat-duration { font-size: 0.55rem; color: #888; cursor: pointer; }
+  .beat-chip .beat-duration:hover { color: #e94560; }
+  .beat-chip .beat-remove { position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; background: #e94560; color: white; border-radius: 50%; font-size: 0.45rem; display: none; align-items: center; justify-content: center; cursor: pointer; border: none; padding: 0; line-height: 1; }
+  .beat-chip:hover .beat-remove { display: flex; }
+  .beat-arrow { color: #555; font-size: 0.7rem; align-self: center; }
+  .empty-input { color: #555; font-size: 0.8rem; padding: 6px 0; }
+
+  .actions { padding: 6px 24px 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* Results */
+  .results { padding: 0 24px 20px; }
+  .results h2 { font-size: 0.95rem; color: #888; margin-bottom: 8px; }
+  .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 10px; }
+  .variant-card { background: #16213e; border: 1px solid #0f3460; border-radius: 9px; padding: 12px; transition: border-color 0.2s; }
+  .variant-card:hover { border-color: #533483; }
+  .variant-card.playing { border-color: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,0.3); }
+  .variant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .variant-title { font-weight: 600; color: #e94560; font-size: 0.85rem; }
+  .variant-meta { font-size: 0.65rem; color: #888; margin-bottom: 6px; }
+  .variant-actions { display: flex; gap: 5px; }
+
+  .tab-display { font-family: 'Courier New', monospace; font-size: 0.7rem; line-height: 1.25; background: #0d1b2a; padding: 8px; border-radius: 5px; white-space: pre; overflow-x: auto; color: #8bc34a; margin-top: 4px; }
+  .tab-display.bass-tab { color: #ff9800; }
+  .tab-display.drum-tab { color: #03a9f4; }
+  .tab-label { font-size: 0.6rem; color: #666; margin-top: 6px; text-transform: uppercase; }
+
+  .difficulty-dots { display: inline-flex; gap: 2px; }
+  .difficulty-dots .dot { width: 6px; height: 6px; border-radius: 50%; background: #333; }
+  .difficulty-dots .dot.filled { background: #e94560; }
+  .placeholder { text-align: center; padding: 25px; color: #555; font-size: 0.85rem; }
+
+  .duration-picker { position: fixed; background: #16213e; border: 1px solid #533483; border-radius: 7px; padding: 6px; display: none; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
+  .duration-picker.visible { display: flex; gap: 3px; }
+  .duration-picker button { padding: 3px 7px; font-size: 0.7rem; border-radius: 4px; }
+  .duration-picker button.active { background: #e94560; border-color: #e94560; }
+
+  @media (max-width: 768px) { .controls { gap: 5px; padding: 6px 10px; } .fretboard-container { padding: 6px 10px; } .results-grid { grid-template-columns: 1fr; } .input-section,.actions { padding-left: 10px; padding-right: 10px; } }
+</style>
+</head>
+<body>
+
+<header><h1>GuitarRiff Helper</h1></header>
+
+<div class="controls">
+  <div class="control-group"><label>Key</label>
+    <select id="keySelect"><option value="0">C</option><option value="1">C#</option><option value="2">D</option><option value="3">D#</option><option value="4">E</option><option value="5">F</option><option value="6">F#</option><option value="7">G</option><option value="8">G#</option><option value="9" selected>A</option><option value="10">A#</option><option value="11">B</option></select>
+  </div>
+  <div class="control-group"><label>Scale</label>
+    <select id="scaleSelect"><option value="major">Major</option><option value="minor">Minor</option><option value="minorPentatonic" selected>Minor Pentatonic</option><option value="majorPentatonic">Major Pentatonic</option><option value="blues">Blues</option><option value="dorian">Dorian</option><option value="phrygian">Phrygian</option><option value="harmonicMinor">Harmonic Minor</option></select>
+  </div>
+  <div class="control-group"><label>Tuning</label>
+    <select id="tuningSelect"><option value="standard">Standard</option><option value="dropD">Drop D</option><option value="dadgad">DADGAD</option><option value="openG">Open G</option><option value="openD">Open D</option><option value="halfDown">Half Down</option><option value="dropC">Drop C</option></select>
+  </div>
+  <div class="control-group"><label>Style</label>
+    <select id="styleSelect"><option value="neutral">Neutral</option><option value="rock">Rock</option><option value="metal">Metal</option><option value="blues">Blues</option><option value="jazz">Jazz</option><option value="funk">Funk</option></select>
+  </div>
+  <div class="control-group"><label>Generate</label>
+    <select id="lengthSelect"><option value="3">3</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option></select>
+  </div>
+  <div class="control-group"><label>Mode</label>
+    <select id="modeSelect"><option value="continue">Continue</option><option value="remix">Remix</option></select>
+  </div>
+  <div class="control-group">
+    <label>Tempo: <span id="tempoValue">120</span></label>
+    <div style="display:flex;gap:4px;align-items:center"><input type="range" id="tempoSlider" value="120" min="40" max="300" style="width:90px;cursor:pointer"><input type="number" id="tempoInput" value="120" min="40" max="300" style="width:45px"></div>
+  </div>
+  <div class="control-group"><label>Duration</label>
+    <select id="defaultDuration"><option value="0.5">1/2</option><option value="0.25" selected>1/4</option><option value="0.125">1/8</option><option value="0.0625">1/16</option></select>
+  </div>
+</div>
+
+<div class="instrument-tabs">
+  <div class="instrument-tab active" data-inst="guitar">Guitar <span class="tab-dot"></span></div>
+  <div class="instrument-tab" data-inst="bass">Bass <span class="tab-dot"></span></div>
+  <div class="instrument-tab" data-inst="drums">Drums <span class="tab-dot"></span></div>
+</div>
+
+<div class="beat-mode-info" id="beatModeInfo">
+  Click = add note to beat. <kbd>Space</kbd>/<kbd>Enter</kbd> = next beat. Right-click = remove.
+</div>
+
+<div class="fretboard-container" id="fretboardContainer">
+  <div class="fretboard" id="fretboard"></div>
+</div>
+<div class="drum-grid" id="drumGrid" style="display:none"></div>
+
+<div class="input-section">
+  <div class="input-label" id="inputLabel">Guitar Beats:</div>
+  <div class="beats-container" id="beatsContainer"><div class="empty-input">Click notes on the fretboard...</div></div>
+</div>
+
+<div class="actions">
+  <button class="btn-primary" id="btnGenerate" disabled>Generate</button>
+  <button class="btn-sm" id="btnPlayInput" style="display:none">Play Input</button>
+  <button class="btn-outline" id="btnClear">Clear</button>
+  <button class="btn-stop" id="btnStop">Stop</button>
+</div>
+
+<div class="results">
+  <h2>Results</h2>
+  <div id="resultsContainer"><div class="placeholder">Select notes and press "Generate"</div></div>
+</div>
+
+<div class="duration-picker" id="durationPicker">
+  <button data-dur="1">1</button><button data-dur="0.5">1/2</button><button data-dur="0.25">1/4</button>
+  <button data-dur="0.125">1/8</button><button data-dur="0.0625">1/16</button><button data-dur="0.375">3/8</button>
+</div>
+
+<script>
+// ============ CONSTANTS ============
+
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const SCALES = {
+  major:[0,2,4,5,7,9,11], minor:[0,2,3,5,7,8,10], minorPentatonic:[0,3,5,7,10],
+  majorPentatonic:[0,2,4,7,9], blues:[0,3,5,6,7,10], dorian:[0,2,3,5,7,9,10],
+  phrygian:[0,1,3,5,7,8,10], harmonicMinor:[0,2,3,5,7,8,11],
+};
+const TUNINGS = {
+  standard:{ midi:[64,59,55,50,45,40], labels:['e','B','G','D','A','E'] },
+  dropD:{ midi:[64,59,55,50,45,38], labels:['e','B','G','D','A','D'] },
+  dadgad:{ midi:[62,57,55,50,45,38], labels:['d','A','G','D','A','D'] },
+  openG:{ midi:[62,59,55,50,43,38], labels:['d','B','G','D','G','D'] },
+  openD:{ midi:[62,57,54,50,45,38], labels:['d','A','F#','D','A','D'] },
+  halfDown:{ midi:[63,58,54,49,44,39], labels:['eb','Bb','Gb','Db','Ab','Eb'] },
+  dropC:{ midi:[62,57,53,48,43,36], labels:['d','A','F','C','G','C'] },
+};
+const BASS_TUNING = { midi:[43,38,33,28], labels:['G','D','A','E'] };
+const DRUM_NAMES = ['Kick','Snare','HiHat','Crash','Tom1','Tom2'];
+const DRUM_STEPS = 16;
+const TOTAL_FRETS = 15;
+
+const STYLES = {
+  neutral:{ powerChords:false, chromaticRuns:false, preferLow:false, preferHigh:false, shuffleFeel:false, rhythmVariety:0.3 },
+  rock:{ powerChords:true, chromaticRuns:false, preferLow:true, preferHigh:false, shuffleFeel:false, rhythmVariety:0.2 },
+  metal:{ powerChords:true, chromaticRuns:true, preferLow:true, preferHigh:false, shuffleFeel:false, rhythmVariety:0.4 },
+  blues:{ powerChords:false, chromaticRuns:false, preferLow:false, preferHigh:false, shuffleFeel:true, rhythmVariety:0.5 },
+  jazz:{ powerChords:false, chromaticRuns:true, preferLow:false, preferHigh:true, shuffleFeel:false, rhythmVariety:0.6 },
+  funk:{ powerChords:false, chromaticRuns:false, preferLow:false, preferHigh:false, shuffleFeel:true, rhythmVariety:0.7 },
+};
+
+// ============ HELPERS ============
+
+function midiToNote(m){ return NOTE_NAMES[m%12]; }
+function midiToNoteOctave(m){ return NOTE_NAMES[m%12]+(Math.floor(m/12)-1); }
+function midiToFreq(m){ return 440*Math.pow(2,(m-69)/12); }
+function getScaleNotes(root,scale){ return SCALES[scale].map(i=>(root%12+i)%12); }
+function isInScale(m,sn){ return sn.includes(m%12); }
+function durationLabel(d){ return {1:'1',0.5:'1/2',0.25:'1/4',0.125:'1/8',0.0625:'1/16',0.375:'3/8'}[d]||d.toFixed(3); }
+
+function getGuitarMidi(s,f){ return TUNINGS[state.tuning].midi[s]+f; }
+function getBassMidi(s,f){ return BASS_TUNING.midi[s]+f; }
+
+// ============ STATE ============
+
+const state = {
+  activeInst: 'guitar', // 'guitar' | 'bass' | 'drums'
+  guitar: { beats: [], currentBeatIdx: -1 },
+  bass: { beats: [], currentBeatIdx: -1 },
+  drums: { pattern: Array.from({length:6},()=>new Array(DRUM_STEPS).fill(false)) },
+  key: 9, scale: 'minorPentatonic', tuning: 'standard', style: 'neutral',
+  genLength: 4, genMode: 'continue', tempo: 120, defaultDuration: 0.25,
+  results: [], loopTimer: null, playingIdx: -1,
+};
+
+function getTrack(){ return state[state.activeInst]; }
+
+// ============ INSTRUMENT TABS ============
+
+document.querySelectorAll('.instrument-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    state.activeInst = tab.dataset.inst;
+    document.querySelectorAll('.instrument-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    refreshView();
+  });
+});
+
+function updateTabDots(){
+  document.querySelectorAll('.instrument-tab').forEach(tab=>{
+    const inst = tab.dataset.inst;
+    const dot = tab.querySelector('.tab-dot');
+    let hasData = false;
+    if(inst==='drums') hasData = state.drums.pattern.some(r=>r.some(v=>v));
+    else hasData = state[inst].beats.length > 0;
+    dot.classList.toggle('has-data', hasData);
+  });
+}
+
+function refreshView(){
+  const isDrum = state.activeInst === 'drums';
+  document.getElementById('fretboardContainer').style.display = isDrum ? 'none' : '';
+  document.getElementById('drumGrid').style.display = isDrum ? '' : 'none';
+  document.getElementById('beatModeInfo').textContent = isDrum
+    ? 'Click cells to toggle drum hits.'
+    : 'Click = add note to beat. Space/Enter = next beat. Right-click = remove.';
+  document.getElementById('inputLabel').textContent =
+    state.activeInst.charAt(0).toUpperCase() + state.activeInst.slice(1) + (isDrum ? ' Pattern:' : ' Beats:');
+
+  if(isDrum) buildDrumGrid();
+  else buildFretboard();
+  renderBeats();
+  updateTabDots();
+
+  const hasData = isDrum
+    ? state.drums.pattern.some(r=>r.some(v=>v))
+    : state[state.activeInst].beats.length > 0;
+  // Enable generate if ANY track has data
+  const anyData = state.guitar.beats.length > 0 || state.bass.beats.length > 0 || state.drums.pattern.some(r=>r.some(v=>v));
+  document.getElementById('btnGenerate').disabled = !anyData;
+  document.getElementById('btnPlayInput').style.display = anyData ? '' : 'none';
+}
+
+// ============ FRETBOARD (Guitar & Bass) ============
+
+function buildFretboard(){
+  const fb = document.getElementById('fretboard');
+  fb.innerHTML = '';
+  const isBass = state.activeInst === 'bass';
+  const strings = isBass ? 4 : 6;
+  const labels = isBass ? BASS_TUNING.labels : TUNINGS[state.tuning].labels;
+  const getMidi = isBass ? getBassMidi : getGuitarMidi;
+  const track = getTrack();
+
+  fb.style.gridTemplateColumns = `40px repeat(${TOTAL_FRETS+1}, 1fr)`;
+  const scaleNotes = getScaleNotes(state.key, state.scale);
+
+  const allSel = new Map();
+  track.beats.forEach((b,bi)=>b.notes.forEach(n=>allSel.set(`${n.string},${n.fret}`,bi)));
+
+  // Fret numbers
+  fb.appendChild(Object.assign(document.createElement('div'),{className:'fret-number'}));
+  for(let f=0;f<=TOTAL_FRETS;f++){
+    const d=document.createElement('div'); d.className='fret-number'; d.textContent=f; fb.appendChild(d);
+  }
+  // Strings
+  for(let s=0;s<strings;s++){
+    const lbl=document.createElement('div'); lbl.className='string-label'; lbl.textContent=labels[s]; fb.appendChild(lbl);
+    for(let f=0;f<=TOTAL_FRETS;f++){
+      const cell=document.createElement('div'); cell.className='fret-cell';
+      if(f===0) cell.classList.add('nut');
+      const midi=getMidi(s,f);
+      const noteName=midiToNote(midi);
+      const inScale=isInScale(midi,scaleNotes);
+      const selKey=`${s},${f}`;
+      if(allSel.has(selKey)||inScale){
+        const m=document.createElement('div'); m.className='note-marker'; m.textContent=noteName;
+        if(allSel.has(selKey)){ m.classList.add('selected'); m.dataset.order=allSel.get(selKey)+1; }
+        else m.classList.add('scale-note');
+        cell.appendChild(m);
+      }
+      if(!isBass && s===2 && [3,5,7,9,12,15].includes(f)){
+        const dot=document.createElement('div'); dot.className='dot-marker'; dot.style.display='block'; cell.appendChild(dot);
+      }
+      cell.addEventListener('click',()=>onFretClick(s,f));
+      cell.addEventListener('contextmenu',e=>{e.preventDefault();removeNoteFromBeats(s,f);});
+      fb.appendChild(cell);
+    }
+  }
+}
+
+// ============ DRUM GRID ============
+
+function buildDrumGrid(){
+  const grid=document.getElementById('drumGrid');
+  grid.innerHTML='';
+  grid.style.gridTemplateColumns=`60px repeat(${DRUM_STEPS}, 1fr)`;
+
+  // Step numbers
+  grid.appendChild(document.createElement('div'));
+  for(let st=0;st<DRUM_STEPS;st++){
+    const n=document.createElement('div'); n.className='drum-step-num'; n.textContent=st+1; grid.appendChild(n);
+  }
+  // Rows
+  for(let r=0;r<DRUM_NAMES.length;r++){
+    const lbl=document.createElement('div'); lbl.className='drum-row-label'; lbl.textContent=DRUM_NAMES[r]; grid.appendChild(lbl);
+    for(let st=0;st<DRUM_STEPS;st++){
+      const cell=document.createElement('div'); cell.className='drum-cell';
+      if(state.drums.pattern[r][st]){ cell.classList.add('active'); cell.textContent='x'; }
+      cell.addEventListener('click',()=>{
+        state.drums.pattern[r][st]=!state.drums.pattern[r][st];
+        buildDrumGrid(); updateTabDots();
+        document.getElementById('btnGenerate').disabled = !(state.guitar.beats.length>0||state.bass.beats.length>0||state.drums.pattern.some(r=>r.some(v=>v)));
+        document.getElementById('btnPlayInput').style.display = (state.guitar.beats.length>0||state.bass.beats.length>0||state.drums.pattern.some(rr=>rr.some(v=>v))) ? '' : 'none';
+      });
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ============ BEAT INPUT ============
+
+function onFretClick(string,fret){
+  const track=getTrack();
+  const isBass = state.activeInst==='bass';
+  const midi = isBass ? getBassMidi(string,fret) : getGuitarMidi(string,fret);
+  const note={string,fret,midi};
+
+  if(track.currentBeatIdx>=0 && track.currentBeatIdx<track.beats.length){
+    const beat=track.beats[track.currentBeatIdx];
+    const ni=beat.notes.findIndex(n=>n.string===string&&n.fret===fret);
+    if(ni>=0){
+      beat.notes.splice(ni,1);
+      if(beat.notes.length===0){ track.beats.splice(track.currentBeatIdx,1); if(track.currentBeatIdx>=track.beats.length) track.currentBeatIdx=-1; }
+      refreshView(); return;
+    }
+    beat.notes.push(note);
+    playNotePreview(midi);
+  } else {
+    track.beats.push({notes:[note],duration:state.defaultDuration});
+    track.currentBeatIdx=track.beats.length-1;
+    playNotePreview(midi);
+  }
+  refreshView();
+}
+
+function advanceBeat(){ getTrack().currentBeatIdx=-1; refreshView(); }
+
+function removeNoteFromBeats(string,fret){
+  const track=getTrack();
+  for(let bi=0;bi<track.beats.length;bi++){
+    const ni=track.beats[bi].notes.findIndex(n=>n.string===string&&n.fret===fret);
+    if(ni>=0){
+      track.beats[bi].notes.splice(ni,1);
+      if(track.beats[bi].notes.length===0){ track.beats.splice(bi,1); if(track.currentBeatIdx>=track.beats.length) track.currentBeatIdx=track.beats.length-1; }
+      refreshView(); return;
+    }
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return;
+  if(e.code==='Space'||e.code==='Enter'){e.preventDefault();advanceBeat();}
+});
+
+// ============ BEATS DISPLAY ============
+
+function renderBeats(){
+  const container=document.getElementById('beatsContainer');
+  if(state.activeInst==='drums'){
+    const hasHits=state.drums.pattern.some(r=>r.some(v=>v));
+    container.innerHTML=hasHits ? '<div class="empty-input" style="color:#03a9f4">Drum pattern set (see grid above)</div>' : '<div class="empty-input">Click cells in the grid above...</div>';
+    return;
+  }
+  const track=getTrack();
+  if(track.beats.length===0){ container.innerHTML='<div class="empty-input">Click notes on the fretboard...</div>'; return; }
+
+  container.innerHTML='';
+  track.beats.forEach((beat,bi)=>{
+    if(bi>0){const a=document.createElement('span');a.className='beat-arrow';a.textContent='\u2192';container.appendChild(a);}
+    const chip=document.createElement('div'); chip.className='beat-chip';
+    if(bi===track.currentBeatIdx) chip.classList.add('current-beat');
+    const nd=document.createElement('div'); nd.className='beat-notes';
+    beat.notes.forEach(n=>{const s=document.createElement('span');s.className='beat-note';s.textContent=midiToNoteOctave(n.midi);nd.appendChild(s);});
+    chip.appendChild(nd);
+    const dur=document.createElement('span'); dur.className='beat-duration'; dur.textContent=durationLabel(beat.duration);
+    dur.addEventListener('click',e=>{e.stopPropagation();showDurationPicker(e,bi);}); chip.appendChild(dur);
+    const rm=document.createElement('button'); rm.className='beat-remove'; rm.textContent='\u00d7';
+    rm.addEventListener('click',e=>{e.stopPropagation();track.beats.splice(bi,1);if(track.currentBeatIdx>=track.beats.length)track.currentBeatIdx=-1;refreshView();}); chip.appendChild(rm);
+    chip.addEventListener('click',()=>{track.currentBeatIdx=bi;refreshView();});
+    container.appendChild(chip);
+  });
+}
+
+function showDurationPicker(event,beatIdx){
+  const picker=document.getElementById('durationPicker');
+  picker.classList.add('visible');
+  picker.style.left=event.clientX+'px'; picker.style.top=(event.clientY-40)+'px';
+  const track=getTrack();
+  picker.querySelectorAll('button').forEach(btn=>{
+    btn.classList.toggle('active',parseFloat(btn.dataset.dur)===track.beats[beatIdx].duration);
+    btn.onclick=()=>{track.beats[beatIdx].duration=parseFloat(btn.dataset.dur);picker.classList.remove('visible');renderBeats();};
+  });
+}
+document.addEventListener('click',e=>{const p=document.getElementById('durationPicker');if(!p.contains(e.target)&&!e.target.classList.contains('beat-duration'))p.classList.remove('visible');});
+
+// ============ AUDIO ============
+
+let audioCtx=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+
+function playNotePreview(midi,dur=0.2){
+  const ctx=getAudioCtx(),osc=ctx.createOscillator(),g=ctx.createGain();
+  osc.type='triangle';osc.frequency.value=midiToFreq(midi);
+  g.gain.setValueAtTime(0.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+  osc.connect(g);g.connect(ctx.destination);osc.start(ctx.currentTime);osc.stop(ctx.currentTime+dur);
+}
+
+function playDrumHit(drumIdx,time){
+  const ctx=getAudioCtx();
+  if(drumIdx===0){ // Kick
+    const osc=ctx.createOscillator(),g=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(150,time);osc.frequency.exponentialRampToValueAtTime(30,time+0.1);g.gain.setValueAtTime(0.8,time);g.gain.exponentialRampToValueAtTime(0.001,time+0.15);osc.connect(g);g.connect(ctx.destination);osc.start(time);osc.stop(time+0.15);
+  } else if(drumIdx===1){ // Snare
+    const bufSize=ctx.sampleRate*0.1,buf=ctx.createBuffer(1,bufSize,ctx.sampleRate),data=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++)data[i]=(Math.random()*2-1)*Math.exp(-i/bufSize*5);
+    const src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=buf;g.gain.setValueAtTime(0.4,time);g.gain.exponentialRampToValueAtTime(0.001,time+0.1);src.connect(g);g.connect(ctx.destination);src.start(time);
+  } else if(drumIdx===2||drumIdx===3){ // HiHat / Crash
+    const bufSize=ctx.sampleRate*(drumIdx===2?0.05:0.2),buf=ctx.createBuffer(1,bufSize,ctx.sampleRate),data=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++)data[i]=(Math.random()*2-1)*Math.exp(-i/bufSize*(drumIdx===2?10:3));
+    const src=ctx.createBufferSource(),g=ctx.createGain(),flt=ctx.createBiquadFilter();
+    src.buffer=buf;flt.type='highpass';flt.frequency.value=drumIdx===2?7000:3000;g.gain.setValueAtTime(drumIdx===2?0.2:0.3,time);g.gain.exponentialRampToValueAtTime(0.001,time+(drumIdx===2?0.05:0.2));
+    src.connect(flt);flt.connect(g);g.connect(ctx.destination);src.start(time);
+  } else { // Toms
+    const freq=drumIdx===4?200:150;const osc=ctx.createOscillator(),g=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,time);osc.frequency.exponentialRampToValueAtTime(freq*0.5,time+0.15);g.gain.setValueAtTime(0.5,time);g.gain.exponentialRampToValueAtTime(0.001,time+0.15);osc.connect(g);g.connect(ctx.destination);osc.start(time);osc.stop(time+0.15);
+  }
+}
+
+function scheduleBeats(beats,startTime,tempo,waveType='triangle'){
+  const ctx=getAudioCtx(),beatUnit=60/tempo;let time=startTime;
+  beats.forEach(beat=>{
+    const dur=beat.duration*4*beatUnit;
+    beat.notes.forEach(note=>{
+      const osc=ctx.createOscillator(),g=ctx.createGain();
+      osc.type=waveType;osc.frequency.value=midiToFreq(note.midi);
+      g.gain.setValueAtTime(0.2,time);g.gain.exponentialRampToValueAtTime(0.001,time+dur*0.9);
+      osc.connect(g);g.connect(ctx.destination);osc.start(time);osc.stop(time+dur);
+    });
+    time+=dur;
+  });
+  return time-startTime;
+}
+
+function scheduleDrums(pattern,startTime,tempo){
+  const ctx=getAudioCtx();
+  const stepDur=(60/tempo)/4; // 16th note
+  for(let r=0;r<pattern.length;r++){
+    for(let s=0;s<DRUM_STEPS;s++){
+      if(pattern[r][s]) playDrumHit(r,startTime+s*stepDur);
+    }
+  }
+  return DRUM_STEPS*stepDur;
+}
+
+function playAllOnce(guitarBeats,bassBeats,drumPattern){
+  const ctx=getAudioCtx(),t=ctx.currentTime;
+  if(guitarBeats.length) scheduleBeats(guitarBeats,t,state.tempo,'triangle');
+  if(bassBeats.length) scheduleBeats(bassBeats,t,state.tempo,'sawtooth');
+  if(drumPattern && drumPattern.some(r=>r.some(v=>v))) scheduleDrums(drumPattern,t,state.tempo);
+}
+
+function playLoopAll(guitarBeats,bassBeats,drumPattern,cardIdx){
+  stopLoop();
+  const ctx=getAudioCtx();
+  state.playingIdx=cardIdx;
+  document.querySelectorAll('.variant-card').forEach((c,i)=>c.classList.toggle('playing',i===cardIdx));
+  document.getElementById('btnStop').classList.add('visible');
+
+  // Calculate loop duration as max of all tracks
+  const beatUnit=60/state.tempo;
+  const gDur=guitarBeats.reduce((s,b)=>s+b.duration*4*beatUnit,0);
+  const bDur=bassBeats.reduce((s,b)=>s+b.duration*4*beatUnit,0);
+  const dDur=(drumPattern&&drumPattern.some(r=>r.some(v=>v)))?(DRUM_STEPS*(60/state.tempo)/4):0;
+  const loopDur=Math.max(gDur,bDur,dDur,0.5);
+
+  let nextStart=ctx.currentTime;
+  function scheduleNext(){
+    if(state.playingIdx!==cardIdx)return;
+    if(guitarBeats.length) scheduleBeats(guitarBeats,nextStart,state.tempo,'triangle');
+    if(bassBeats.length) scheduleBeats(bassBeats,nextStart,state.tempo,'sawtooth');
+    if(drumPattern&&drumPattern.some(r=>r.some(v=>v))) scheduleDrums(drumPattern,nextStart,state.tempo);
+    nextStart+=loopDur;
+    state.loopTimer=setTimeout(scheduleNext,Math.max((loopDur-0.1)*1000,50));
+  }
+  scheduleNext();
+}
+
+function stopLoop(){
+  if(state.loopTimer){clearTimeout(state.loopTimer);state.loopTimer=null;}
+  state.playingIdx=-1;
+  document.querySelectorAll('.variant-card').forEach(c=>c.classList.remove('playing'));
+  document.getElementById('btnStop').classList.remove('visible');
+}
+
+// ============ GENERATION ============
+
+function generate(){
+  const scaleNotes=getScaleNotes(state.key,state.scale);
+  const genLen=parseInt(state.genLength);
+  const styleConfig=STYLES[state.style];
+  const isRemix = state.genMode === 'remix';
+  const results=[];
+
+  const guitarInput=state.guitar.beats.flatMap(b=>b.notes);
+  const bassInput=state.bass.beats.flatMap(b=>b.notes);
+  const strategies=['stepwise','skipUp','skipDown','pendulum','resolve','chromatic','styleLick'];
+
+  for(let v=0;v<7;v++){
+    const strategy=strategies[v%strategies.length];
+    let genGuitar=[], genBass=[];
+
+    // Guitar generation
+    if(guitarInput.length>0){
+      if(isRemix){
+        genGuitar=generateRemix(guitarInput,scaleNotes,genLen,strategy,styleConfig,getGuitarMidi,6);
+      } else {
+        genGuitar=generateContinuation(guitarInput,scaleNotes,genLen,strategy,styleConfig,getGuitarMidi,6)||[];
+        if(genGuitar.length) ensureLoopable(genGuitar,guitarInput,scaleNotes,getGuitarMidi,6);
+      }
+    }
+
+    // Bass generation — follows guitar harmony if guitar exists, otherwise independent
+    if(bassInput.length>0 || (guitarInput.length>0 && genGuitar.length>0)){
+      if(bassInput.length>0){
+        if(isRemix) genBass=generateRemix(bassInput,scaleNotes,Math.min(genLen,6),strategy,styleConfig,getBassMidi,4);
+        else{
+          genBass=generateContinuation(bassInput,scaleNotes,Math.min(genLen,6),strategy,styleConfig,getBassMidi,4)||[];
+          if(genBass.length) ensureLoopable(genBass,bassInput,scaleNotes,getBassMidi,4);
+        }
+      } else {
+        // Auto-generate bass from guitar root notes
+        genBass=generateBassFromGuitar(genGuitar,scaleNotes,styleConfig);
+      }
+    }
+
+    if(genGuitar.length===0 && genBass.length===0) continue;
+
+    const gBeats=assignRhythm(genGuitar,styleConfig);
+    const bBeats=assignRhythm(genBass,{...styleConfig,shuffleFeel:false});
+    const fullGBeats=[...state.guitar.beats,...gBeats];
+    const fullBBeats=[...state.bass.beats,...bBeats];
+
+    results.push({
+      id:v,
+      guitarBeats:fullGBeats, bassBeats:fullBBeats,
+      drumPattern:state.drums.pattern.map(r=>[...r]),
+      score:scoreVariation(genGuitar,guitarInput,styleConfig)+scoreVariation(genBass,bassInput,styleConfig)/2,
+    });
+  }
+
+  results.sort((a,b)=>b.score-a.score);
+  state.results=results.slice(0,5);
+  renderResults();
+}
+
+function generateContinuation(inputFlat,scaleNotes,length,strategy,styleConfig,getMidiFn,stringCount){
+  const notes=[];
+  const last=inputFlat[inputFlat.length-1]; if(!last) return null;
+  let current={...last};
+  let dir=0;
+  if(inputFlat.length>=2) dir=inputFlat[inputFlat.length-1].midi-inputFlat[inputFlat.length-2].midi;
+  for(let i=0;i<length;i++){
+    const next=getNextNote(current,scaleNotes,strategy,i,dir,[...inputFlat,...notes],styleConfig,getMidiFn,stringCount);
+    if(!next) break;
+    notes.push(next); current=next;
+  }
+  return notes.length>0?notes:null;
+}
+
+function generateRemix(inputFlat,scaleNotes,length,strategy,styleConfig,getMidiFn,stringCount){
+  // Use only pitch classes from input + scale, create entirely new sequence
+  const inputPitchClasses=[...new Set(inputFlat.map(n=>n.midi%12))];
+  const remixScale=inputPitchClasses.filter(pc=>scaleNotes.includes(pc));
+  const useScale=remixScale.length>=3 ? remixScale : scaleNotes;
+
+  const notes=[];
+  // Start from a random input pitch in a random position
+  const startPitch=inputPitchClasses[Math.floor(Math.random()*inputPitchClasses.length)];
+  let current=null;
+  // Find this pitch on the fretboard
+  for(let s=0;s<stringCount&&!current;s++){
+    for(let f=0;f<=TOTAL_FRETS&&!current;f++){
+      if(getMidiFn(s,f)%12===startPitch) current={string:s,fret:f,midi:getMidiFn(s,f)};
+    }
+  }
+  if(!current) return [];
+
+  notes.push(current);
+  for(let i=1;i<length;i++){
+    const next=getNextNote(current,useScale,strategy,i,0,notes,styleConfig,getMidiFn,stringCount);
+    if(!next) break;
+    notes.push(next); current=next;
+  }
+  return notes;
+}
+
+function generateBassFromGuitar(guitarNotes,scaleNotes,styleConfig){
+  // Create bass line following root notes, one octave down concept
+  const bassNotes=[];
+  const step=Math.max(1,Math.floor(guitarNotes.length/4));
+  for(let i=0;i<guitarNotes.length;i+=step){
+    const gNote=guitarNotes[i];
+    const targetPitch=gNote.midi%12;
+    // Find this pitch on bass
+    for(let s=0;s<4;s++){
+      for(let f=0;f<=12;f++){
+        if(getBassMidi(s,f)%12===targetPitch){
+          bassNotes.push({string:s,fret:f,midi:getBassMidi(s,f)});
+          s=4; break; // found
+        }
+      }
+    }
+  }
+  return bassNotes;
+}
+
+function getNextNote(current,scaleNotes,strategy,step,inputDir,allPrev,styleConfig,getMidiFn,stringCount){
+  const candidates=[];
+  const maxFR=strategy==='chromatic'?3:5;
+  for(let s=Math.max(0,current.string-2);s<Math.min(stringCount,current.string+3);s++){
+    for(let f=Math.max(0,current.fret-maxFR);f<=Math.min(TOTAL_FRETS,current.fret+maxFR);f++){
+      const midi=getMidiFn(s,f);
+      if(s===current.string&&f===current.fret)continue;
+      const inS=isInScale(midi,scaleNotes);
+      if(!inS&&strategy!=='chromatic')continue;
+      candidates.push({string:s,fret:f,midi,dist:Math.abs(f-current.fret)+Math.abs(s-current.string)*2,inScale:inS});
+    }
+  }
+  if(!candidates.length)return null;
+
+  const root=state.key%12;
+  candidates.forEach(c=>{
+    c.score=10-c.dist;
+    const iv=c.midi-current.midi;
+    if(!c.inScale)c.score-=3;
+    switch(strategy){
+      case'stepwise':if(Math.abs(iv)<=3)c.score+=5;if(inputDir>0&&iv>0)c.score+=3;if(inputDir<0&&iv<0)c.score+=3;break;
+      case'skipUp':if(step===0&&iv>=3&&iv<=7)c.score+=8;else if(iv>0&&iv<=3)c.score+=4;break;
+      case'skipDown':if(step===0&&iv<=-3&&iv>=-7)c.score+=8;else if(iv<0&&Math.abs(iv)<=3)c.score+=4;break;
+      case'pendulum':{const u=step%2===0;if(u&&iv>0)c.score+=5;if(!u&&iv<0)c.score+=5;if(Math.abs(iv)>=2&&Math.abs(iv)<=5)c.score+=3;break;}
+      case'resolve':{const cd=Math.abs((current.midi%12)-root),ca=Math.abs((c.midi%12)-root);if(ca<cd)c.score+=5;if(ca===0)c.score+=3;break;}
+      case'chromatic':if(Math.abs(iv)===1)c.score+=6;else if(Math.abs(iv)===2)c.score+=3;break;
+      case'styleLick':if(styleConfig.preferLow&&c.string>=stringCount-2)c.score+=3;if(styleConfig.preferHigh&&c.string<=1)c.score+=3;if(styleConfig.powerChords&&Math.abs(iv)===7)c.score+=5;if(styleConfig.chromaticRuns&&Math.abs(iv)===1)c.score+=4;if(Math.abs(iv)<=4)c.score+=3;break;
+    }
+    if(styleConfig.preferLow&&c.string>=stringCount-1)c.score+=1;
+    if(styleConfig.preferHigh&&c.string<=0)c.score+=1;
+    const recent=allPrev.slice(-2);if(recent.some(n=>n.midi===c.midi))c.score-=3;
+  });
+
+  candidates.sort((a,b)=>b.score-a.score);
+  const topN=candidates.slice(0,Math.min(6,candidates.length));
+  const ts=topN.reduce((s,c)=>s+Math.max(c.score,1),0);
+  let r=Math.random()*ts;
+  for(const c of topN){r-=Math.max(c.score,1);if(r<=0)return{string:c.string,fret:c.fret,midi:c.midi};}
+  return{string:topN[0].string,fret:topN[0].fret,midi:topN[0].midi};
+}
+
+function ensureLoopable(gen,inputFlat,scaleNotes,getMidiFn,stringCount){
+  if(!gen.length||!inputFlat.length)return;
+  const first=inputFlat[0],last=gen[gen.length-1];
+  if(Math.abs(last.midi-first.midi)>7){
+    let best=null,bd=Infinity;
+    for(let s=Math.max(0,last.string-2);s<Math.min(stringCount,last.string+3);s++){
+      for(let f=Math.max(0,last.fret-4);f<=Math.min(TOTAL_FRETS,last.fret+4);f++){
+        const m=getMidiFn(s,f);if(!isInScale(m,scaleNotes))continue;
+        const d=Math.abs(m-first.midi);if(d<bd&&d<=5){bd=d;best={string:s,fret:f,midi:m};}
+      }
+    }
+    if(best) gen[gen.length-1]=best;
+  }
+}
+
+function assignRhythm(notes,styleConfig){
+  if(!notes.length) return [];
+  const beats=[];
+  const baseDur=state.defaultDuration;
+  const variety=styleConfig.rhythmVariety||0;
+
+  // Available durations pool
+  const durPool=[baseDur];
+  if(variety>0.2) durPool.push(baseDur*2, baseDur*0.5);
+  if(variety>0.5) durPool.push(baseDur*1.5, baseDur*0.5);
+
+  notes.forEach((note,i)=>{
+    let dur=baseDur;
+    if(styleConfig.shuffleFeel){
+      dur=i%2===0?baseDur*1.33:baseDur*0.67;
+    } else if(variety>0 && Math.random()<variety){
+      // Pick a random duration from pool
+      dur=durPool[Math.floor(Math.random()*durPool.length)];
+    }
+    beats.push({notes:[note],duration:Math.round(dur*10000)/10000});
+  });
+  return beats;
+}
+
+function scoreVariation(gen,inputFlat,styleConfig){
+  if(!gen.length)return 0;
+  let score=50;
+  const all=[...inputFlat,...gen];
+  for(let i=1;i<all.length;i++){const iv=Math.abs(all[i].midi-all[i-1].midi);if(iv<=3)score+=5;else if(iv<=5)score+=3;else if(iv<=7)score+=1;else score-=3;}
+  for(let i=1;i<gen.length;i++){const fd=Math.abs(gen[i].fret-gen[i-1].fret),sd=Math.abs(gen[i].string-gen[i-1].string);if(fd<=3&&sd<=1)score+=4;else if(fd>5||sd>2)score-=5;}
+  score+=[...new Set(gen.map(n=>n.midi%12))].length*3;
+  if(inputFlat.length>0&&gen.length>0){const li=Math.abs(gen[gen.length-1].midi-inputFlat[0].midi);if(li<=3)score+=6;else if(li<=5)score+=3;else if(li>8)score-=5;}
+  if(styleConfig.preferLow&&gen.some(n=>n.string>=4))score+=3;
+  if(styleConfig.preferHigh&&gen.some(n=>n.string<=1))score+=3;
+  return Math.max(0,Math.min(100,score));
+}
+
+// ============ TAB RENDERING ============
+
+function beatsToTab(beats,labels){
+  if(!beats.length) return '';
+  const lines=labels.map(n=>n.padStart(2)+'|');
+  beats.forEach(beat=>{
+    const fbs={};beat.notes.forEach(n=>{fbs[n.string]=n.fret;});
+    for(let s=0;s<labels.length;s++){
+      if(s in fbs){lines[s]+=fbs[s].toString().padStart(2,'-')+'-';}
+      else lines[s]+='---';
+    }
+  });
+  lines.forEach((_,i)=>{lines[i]+='|';});
+  return lines.join('\n');
+}
+
+function drumPatternToText(pattern){
+  if(!pattern.some(r=>r.some(v=>v))) return '';
+  const lines=[];
+  for(let r=0;r<DRUM_NAMES.length;r++){
+    if(!pattern[r].some(v=>v)) continue;
+    let line=DRUM_NAMES[r].substring(0,2).padStart(2)+'|';
+    for(let s=0;s<DRUM_STEPS;s++) line+=pattern[r][s]?'x ':'. ';
+    lines.push(line+'|');
+  }
+  return lines.join('\n');
+}
+
+// ============ RESULTS ============
+
+function renderResults(){
+  const container=document.getElementById('resultsContainer');
+  if(!state.results.length){container.innerHTML='<div class="placeholder">No results. Try different input.</div>';return;}
+
+  const grid=document.createElement('div');grid.className='results-grid';
+  const gLabels=TUNINGS[state.tuning].labels, bLabels=BASS_TUNING.labels;
+
+  state.results.forEach((result,idx)=>{
+    const card=document.createElement('div');card.className='variant-card';
+    const diff=result.score>75?1:result.score>50?2:3;
+    const dots=Array.from({length:4},(_,i)=>`<span class="dot ${i<diff?'filled':''}"></span>`).join('');
+
+    let tabsHtml='';
+    const gTab=beatsToTab(result.guitarBeats,gLabels);
+    const bTab=beatsToTab(result.bassBeats,bLabels);
+    const dTab=drumPatternToText(result.drumPattern);
+    if(gTab) tabsHtml+=`<div class="tab-label">Guitar</div><div class="tab-display">${gTab}</div>`;
+    if(bTab) tabsHtml+=`<div class="tab-label">Bass</div><div class="tab-display bass-tab">${bTab}</div>`;
+    if(dTab) tabsHtml+=`<div class="tab-label">Drums</div><div class="tab-display drum-tab">${dTab}</div>`;
+
+    card.innerHTML=`
+      <div class="variant-header">
+        <span class="variant-title">Variant ${idx+1} ${state.genMode==='remix'?'(Remix)':''}</span>
+        <div class="variant-actions">
+          <button class="btn-sm btn-play-once" data-idx="${idx}">Play</button>
+          <button class="btn-sm btn-loop" data-idx="${idx}">Loop</button>
+          <button class="btn-sm btn-use" data-idx="${idx}">Use</button>
+        </div>
+      </div>
+      <div class="variant-meta">Score: ${Math.round(result.score)} &nbsp; <span class="difficulty-dots">${dots}</span> &nbsp; ${state.style} ${state.genMode}</div>
+      ${tabsHtml}`;
+    grid.appendChild(card);
+  });
+
+  container.innerHTML='';container.appendChild(grid);
+
+  container.querySelectorAll('.btn-play-once').forEach(btn=>{
+    btn.addEventListener('click',()=>{stopLoop();const r=state.results[+btn.dataset.idx];playAllOnce(r.guitarBeats,r.bassBeats,r.drumPattern);});
+  });
+  container.querySelectorAll('.btn-loop').forEach(btn=>{
+    btn.addEventListener('click',()=>{const i=+btn.dataset.idx;if(state.playingIdx===i)stopLoop();else{const r=state.results[i];playLoopAll(r.guitarBeats,r.bassBeats,r.drumPattern,i);}});
+  });
+  container.querySelectorAll('.btn-use').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      stopLoop();const r=state.results[+btn.dataset.idx];
+      state.guitar.beats=r.guitarBeats.map(b=>({notes:b.notes.map(n=>({...n})),duration:b.duration}));
+      state.bass.beats=r.bassBeats.map(b=>({notes:b.notes.map(n=>({...n})),duration:b.duration}));
+      state.guitar.currentBeatIdx=-1; state.bass.currentBeatIdx=-1;
+      state.results=[];refreshView();renderResults();
+    });
+  });
+}
+
+// ============ EVENT LISTENERS ============
+
+document.getElementById('keySelect').addEventListener('change',e=>{state.key=+e.target.value;refreshView();});
+document.getElementById('scaleSelect').addEventListener('change',e=>{state.scale=e.target.value;refreshView();});
+document.getElementById('tuningSelect').addEventListener('change',e=>{
+  state.tuning=e.target.value;
+  state.guitar.beats.forEach(b=>b.notes.forEach(n=>{n.midi=getGuitarMidi(n.string,n.fret);}));
+  refreshView();
+});
+document.getElementById('styleSelect').addEventListener('change',e=>{state.style=e.target.value;});
+document.getElementById('lengthSelect').addEventListener('change',e=>{state.genLength=+e.target.value;});
+document.getElementById('modeSelect').addEventListener('change',e=>{state.genMode=e.target.value;});
+
+function setTempo(v){state.tempo=Math.max(40,Math.min(300,+v||120));document.getElementById('tempoSlider').value=state.tempo;document.getElementById('tempoInput').value=state.tempo;document.getElementById('tempoValue').textContent=state.tempo;}
+document.getElementById('tempoSlider').addEventListener('input',e=>setTempo(e.target.value));
+document.getElementById('tempoInput').addEventListener('change',e=>setTempo(e.target.value));
+document.getElementById('defaultDuration').addEventListener('change',e=>{state.defaultDuration=+e.target.value;});
+document.getElementById('btnGenerate').addEventListener('click',generate);
+document.getElementById('btnClear').addEventListener('click',()=>{
+  stopLoop();
+  if(state.activeInst==='drums') state.drums.pattern=Array.from({length:6},()=>new Array(DRUM_STEPS).fill(false));
+  else{state[state.activeInst].beats=[];state[state.activeInst].currentBeatIdx=-1;}
+  state.results=[];refreshView();
+  document.getElementById('resultsContainer').innerHTML='<div class="placeholder">Select notes and press "Generate"</div>';
+});
+document.getElementById('btnStop').addEventListener('click',stopLoop);
+document.getElementById('btnPlayInput').addEventListener('click',()=>{stopLoop();playAllOnce(state.guitar.beats,state.bass.beats,state.drums.pattern);});
+
+// ============ INIT ============
+refreshView();
+</script>
+</body>
+</html>

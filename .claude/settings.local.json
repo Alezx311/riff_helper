@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Read(//d/js/melody-processing/public/samples/**)",
+      "Bash(grep \".mp3$\")",
+      "Bash(done)",
+      "Bash(npm create:*)"
+    ]
+  }
+}
