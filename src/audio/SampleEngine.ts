@@ -356,7 +356,7 @@ class SampleEngine {
 
     const vol = new T.Volume(0).toDestination()
     const urls = buildSampleUrls(sampleSet)
-    const baseUrl = `/samples/${sampleSet}/`
+    const baseUrl = `${import.meta.env.BASE_URL}samples/${sampleSet}/`
 
     const entry: SamplerEntry = {
       sampler: new T.Sampler({
