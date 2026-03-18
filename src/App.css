@@ -61,7 +61,9 @@ input { cursor: text; }
 
 /* Input display */
 .input-section { padding: 6px 24px; }
-.input-label { color: #888; font-size: 0.8rem; margin-bottom: 4px; }
+.input-label { color: #888; font-size: 0.8rem; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.advance-beat-btn { background: #533483; color: #fff; border: none; border-radius: 5px; padding: 2px 8px; font-size: 0.75rem; cursor: pointer; }
+.advance-beat-btn:hover { background: #e94560; }
 .beats-container { display: flex; gap: 3px; flex-wrap: wrap; align-items: flex-start; min-height: 32px; }
 .beat-chip { background: #16213e; border: 1px solid #533483; border-radius: 7px; padding: 3px 7px; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 44px; position: relative; font-size: 0.65rem; cursor: pointer; }
 .beat-chip.current-beat { border-color: #e94560; box-shadow: 0 0 5px rgba(233,69,96,0.4); }

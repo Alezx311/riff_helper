@@ -57,9 +57,22 @@ export function BeatInput() {
 
   if (!track) return null;
 
+  const canAdvance = !isDrum && track && track.currentBeatIdx >= 0;
+
   return (
     <div className="input-section">
-      <div className="input-label">{instLabel} Beats:</div>
+      <div className="input-label">
+        {instLabel} Beats:
+        {canAdvance && (
+          <button
+            className="advance-beat-btn"
+            onClick={() => dispatch({ type: 'ADVANCE_BEAT', payload: inst as InstrumentType })}
+            title="Add new beat"
+          >
+            + Beat
+          </button>
+        )}
+      </div>
       <div className="beats-container">
         {track.beats.length === 0 ? (
           <div className="empty-input">Click notes on the fretboard...</div>
