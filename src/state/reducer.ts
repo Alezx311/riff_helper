@@ -211,6 +211,11 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         },
       };
 
+    case 'LOAD_BEATS': {
+      const { inst, beats } = action.payload;
+      return { ...state, [inst]: { beats, currentBeatIdx: beats.length > 0 ? beats.length - 1 : -1 } };
+    }
+
     default:
       return state;
   }

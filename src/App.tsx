@@ -1,6 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppProvider, useAppState } from './state/AppContext';
 import { Header } from './components/Header/Header';
+import { JamSession } from './components/JamSession/JamSession';
 import { Controls } from './components/Controls/Controls';
 import { InstrumentTabs } from './components/InstrumentTabs/InstrumentTabs';
 import { Fretboard } from './components/Fretboard/Fretboard';
@@ -16,6 +17,7 @@ import './App.css';
 
 function AppInner() {
   const { state, dispatch } = useAppState();
+  const [activeView, setActiveView] = useState<'main' | 'jam'>('main');
   const { playAllOnce, playLoop, stopPlayback, playPreview } = useAudioEngine(state.mixer, state.tempo);
 
   const isDrum = state.activeInst === 'drums';
@@ -70,40 +72,47 @@ function AppInner() {
 
   return (
     <div className="app">
-      <Header />
-      <Controls />
-      <InstrumentTabs />
+      <Header activeView={activeView} onSetView={setActiveView} />
 
-      <div className="beat-mode-info">
-        {isDrum
-          ? 'Click cells to toggle drum hits.'
-          : <>Click = add note to beat. <kbd>Space</kbd>/<kbd>Enter</kbd> = next beat. Right-click = remove.</>
-        }
-      </div>
+      {activeView === 'jam' && <JamSession onSwitchToMain={() => setActiveView('main')} />}
 
-      {isDrum ? <DrumGrid /> : <Fretboard onNotePreview={handleNotePreview} />}
+      {activeView === 'main' && (
+        <>
+          <Controls />
+          <InstrumentTabs />
 
-      <BeatInput />
+          <div className="beat-mode-info">
+            {isDrum
+              ? 'Click cells to toggle drum hits.'
+              : <>Click = add note to beat. <kbd>Space</kbd>/<kbd>Enter</kbd> = next beat. Right-click = remove.</>
+            }
+          </div>
 
-      <div className="main-layout">
-        <div className="main-content">
-          <GenerationControls
-            onGenerate={handleGenerate}
-            onPlayInput={handlePlayInput}
-            onClear={handleClear}
-            onStop={handleStop}
-            isPlaying={state.playingIdx >= 0}
-          />
+          {isDrum ? <DrumGrid /> : <Fretboard onNotePreview={handleNotePreview} />}
 
-          <Results
-            onPlayOnce={handlePlayOnce}
-            onLoop={handleLoop}
-            onStop={handleStop}
-          />
-        </div>
+          <BeatInput />
 
-        <MixerPanel />
-      </div>
+          <div className="main-layout">
+            <div className="main-content">
+              <GenerationControls
+                onGenerate={handleGenerate}
+                onPlayInput={handlePlayInput}
+                onClear={handleClear}
+                onStop={handleStop}
+                isPlaying={state.playingIdx >= 0}
+              />
+
+              <Results
+                onPlayOnce={handlePlayOnce}
+                onLoop={handleLoop}
+                onStop={handleStop}
+              />
+            </div>
+
+            <MixerPanel />
+          </div>
+        </>
+      )}
     </div>
   );
 }

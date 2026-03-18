@@ -1,8 +1,12 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
 
-.app-header { background: #16213e; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f3460; }
-.app-header h1 { font-size: 1.3rem; color: #e94560; }
+.app-header { background: #16213e; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f3460; gap: 16px; }
+.app-header h1 { font-size: 1.3rem; color: #e94560; flex-shrink: 0; }
+.app-nav { display: flex; gap: 4px; }
+.app-nav-btn { background: transparent; border: 1px solid transparent; color: #888; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.app-nav-btn:hover { color: #e0e0e0; border-color: #533483; }
+.app-nav-btn.active { background: rgba(233,69,96,0.12); color: #e94560; border-color: #e94560; }
 
 .controls { display: flex; gap: 10px; padding: 10px 24px; background: #16213e; flex-wrap: wrap; align-items: flex-end; }
 .control-group { display: flex; flex-direction: column; gap: 3px; }

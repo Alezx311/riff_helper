@@ -1,0 +1,249 @@
+/* Jam Session layout */
+.jam-session {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Controls bar */
+.jam-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 10px 24px;
+  background: #16213e;
+  border-bottom: 1px solid #0f3460;
+  flex-wrap: wrap;
+}
+
+.jam-selectors {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.jam-timer-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.jam-rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e94560;
+  animation: jam-blink 1s step-start infinite;
+  flex-shrink: 0;
+}
+
+@keyframes jam-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.jam-timer {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #e0e0e0;
+  min-width: 44px;
+}
+
+.jam-btn-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.jam-btn-rec {
+  font-size: 0.95rem !important;
+  padding: 8px 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+}
+
+.jam-btn-use {
+  font-size: 0.82rem !important;
+  padding: 7px 14px !important;
+  font-weight: 600 !important;
+}
+
+.jam-use-inline {
+  background: transparent;
+  border: 1px solid #533483;
+  color: #b8a9c9;
+  padding: 2px 9px;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.15s;
+}
+
+.jam-use-inline:hover {
+  background: rgba(83, 52, 131, 0.2);
+  color: #e0e0e0;
+}
+
+/* Canvas visualizer */
+.jam-canvas {
+  width: 100%;
+  height: 200px;
+  display: block;
+  background: #080819;
+}
+
+/* Current note panel */
+.jam-note-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 24px;
+  background: #10172a;
+  border-bottom: 1px solid #0f3460;
+  min-height: 58px;
+}
+
+.jam-big-note {
+  font-size: 2.4rem;
+  font-weight: 800;
+  min-width: 72px;
+  color: #666;
+  transition: color 0.15s, text-shadow 0.15s;
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-big-note.note-in-key {
+  color: #4caf50;
+  text-shadow: 0 0 18px rgba(76, 175, 80, 0.6);
+}
+
+.jam-big-note.note-out-key {
+  color: #e94560;
+  text-shadow: 0 0 18px rgba(233, 69, 96, 0.5);
+}
+
+.jam-note-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.jam-freq {
+  font-size: 0.75rem;
+  color: #666;
+  font-variant-numeric: tabular-nums;
+}
+
+.jam-key-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+.badge-in {
+  background: rgba(76, 175, 80, 0.15);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.badge-out {
+  background: rgba(233, 69, 96, 0.12);
+  color: #e94560;
+  border: 1px solid rgba(233, 69, 96, 0.3);
+}
+
+.jam-hint {
+  font-size: 0.78rem;
+  color: #555;
+}
+
+/* Jam fretboard: active note highlight */
+.note-marker.jam-active {
+  background: #4caf50;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.7), 0 0 4px rgba(76, 175, 80, 0.9);
+  animation: jam-pulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes jam-pulse {
+  from { box-shadow: 0 0 6px rgba(76, 175, 80, 0.6); }
+  to   { box-shadow: 0 0 14px rgba(76, 175, 80, 0.9); }
+}
+
+/* Note history */
+.jam-history {
+  padding: 10px 24px 14px;
+  background: #0d1525;
+  border-top: 1px solid #0f3460;
+}
+
+.jam-history-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.jam-history-title {
+  font-size: 0.7rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.jam-history-count {
+  font-size: 0.65rem;
+  color: #444;
+}
+
+.jam-history-scroll {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.jam-hist-note {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: default;
+  border: 1px solid transparent;
+  transition: opacity 0.2s;
+}
+
+.jam-hist-note.hist-in {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  border-color: rgba(76, 175, 80, 0.2);
+}
+
+.jam-hist-note.hist-out {
+  background: rgba(233, 69, 96, 0.08);
+  color: #e94560;
+  border-color: rgba(233, 69, 96, 0.2);
+}
+
+.jam-hist-dur {
+  font-size: 0.55rem;
+  font-weight: 400;
+  color: #555;
+  margin-top: 1px;
+}
+
+@media (max-width: 768px) {
+  .jam-controls { padding: 8px 10px; gap: 8px; }
+  .jam-note-panel { padding: 8px 10px; }
+  .jam-canvas { height: 150px; }
+  .jam-history { padding: 8px 10px 12px; }
+}

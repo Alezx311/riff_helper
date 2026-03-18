@@ -49,4 +49,5 @@ export type AppAction =
   | { type: 'TOGGLE_SOLO'; payload: InstrumentType }
   | { type: 'SET_SAMPLE_SET'; payload: { inst: InstrumentType; sampleSet: SampleSet } }
   | { type: 'TOGGLE_GENERATE_FOR'; payload: InstrumentType }
-  | { type: 'UPDATE_TUNING_MIDI'; payload: string };
+  | { type: 'UPDATE_TUNING_MIDI'; payload: string }
+  | { type: 'LOAD_BEATS'; payload: { inst: 'guitar' | 'bass'; beats: import('../types').Beat[] } };
