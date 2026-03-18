@@ -12,15 +12,23 @@ function formatTime(s: number) {
   return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 }
 
-/** Find lowest-fret position for a MIDI note on guitar given tuning */
+/** Find lowest-fret position for a MIDI note on guitar given tuning.
+ *  If the note is out of range, transpose down by octaves until it fits. */
 function midiToBestFret(midi: number, tuningMidi: number[]): FretNote | null {
+  const lowestOpen = Math.min(...tuningMidi);
+  let m = midi;
+  // Transpose down until at least one string can play it within 15 frets
+  while (m > lowestOpen + 15) m -= 12;
+  // Also ensure we're not below the lowest open string
+  while (m < lowestOpen) m += 12;
+
   let best: FretNote | null = null;
   let bestFret = Infinity;
   for (let s = 0; s < tuningMidi.length; s++) {
-    const fret = midi - tuningMidi[s];
+    const fret = m - tuningMidi[s];
     if (fret >= 0 && fret <= 15 && fret < bestFret) {
       bestFret = fret;
-      best = { string: s, fret, midi };
+      best = { string: s, fret, midi: m };
     }
   }
   return best;
@@ -29,7 +37,7 @@ function midiToBestFret(midi: number, tuningMidi: number[]): FretNote | null {
 /** Convert note duration in seconds to nearest Beat duration (in quarter notes) */
 function secondsToBeatDuration(durationSec: number, bpm: number): number {
   const inBeats = durationSec * bpm / 60;
-  const options = [2, 1, 0.5, 0.375, 0.25, 0.125, 0.0625];
+  const options = [1, 0.5, 0.375, 0.25, 0.125, 0.0625];
   return options.reduce((best, opt) =>
     Math.abs(opt - inBeats) < Math.abs(best - inBeats) ? opt : best
   );
