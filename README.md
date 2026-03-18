@@ -333,11 +333,11 @@ Scoring formula (score 0-100):
 
 **Інструменти:**
 
-| Інструмент        | Вхід         | Генерація                   | Звук               |
-| ----------------- | ------------ | --------------------------- | ------------------ |
-| Guitar (6 струн)  | Гриф (клік)  | 7 стратегій                 | Triangle wave      |
-| Bass (4 струни)   | Гриф (клік)  | Незалежна або авто з гітари | Sawtooth wave      |
-| Drums (6 голосів) | 16-step grid | Pass-through                | Synth (sine+noise) |
+| Інструмент        | Вхід         | Генерація                   | Звук                              |
+| ----------------- | ------------ | --------------------------- | --------------------------------- |
+| Guitar (6 струн)  | Гриф (клік)  | 7 стратегій                 | Tone.Sampler (реальні семпли)     |
+| Bass (4 струни)   | Гриф (клік)  | Незалежна або авто з гітари | Tone.Sampler (реальні семпли)     |
+| Drums (6 голосів) | 16-step grid | Pass-through                | Web Audio synth (sine+noise)      |
 
 **Drum voices:** Kick (sine 150→30Hz), Snare (noise), HiHat (high noise), Crash (wide noise), Tom1 (sine 200Hz), Tom2 (sine 150Hz)
 
@@ -477,44 +477,38 @@ E|---------------------------|
 
 ## 5. Технічна архітектура
 
-### 5.1 Рекомендований стек
+### 5.1 Поточний стек (РЕАЛІЗОВАНО)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         FRONTEND                                │
 ├─────────────────────────────────────────────────────────────────┤
-│  Framework:    React 18+ / Vue 3 / Svelte                       │
-│  State:        Zustand / Pinia / Svelte stores                  │
-│  Styling:      Tailwind CSS + Headless UI                       │
-│  Audio:        Tone.js (Web Audio wrapper)                      │
-│  Notation:     VexFlow (music notation rendering)               │
-│  Canvas:       Konva.js / Fabric.js (для грифа)                 │
+│  Framework:    React 19 + TypeScript                            │
+│  Build:        Vite 8                                           │
+│  State:        useReducer + React Context                       │
+│  Audio:        Tone.js 14 (Sampler з реальними семплами)        │
+│                Web Audio API (барабани, Jam Session)            │
+│  Styling:      CSS Modules / plain CSS                          │
+│  Нотація:      Tab-рядки (власна реалізація)                    │
+│  Гриф:         DOM/CSS (без Canvas)                             │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
 │                    GENERATION ENGINE                            │
 ├─────────────────────────────────────────────────────────────────┤
-│  Option A: Client-side (WASM)                                   │
-│    - Rust/Go compiled to WebAssembly                            │
-│    - Переваги: офлайн, швидко, без серверних витрат             │
-│                                                                 │
-│  Option B: Server-side                                          │
-│    - Python (music21 library) / Node.js                         │
-│    - Переваги: легше оновлювати логіку, ML-моделі               │
-│                                                                 │
-│  Рекомендація: Гібрид                                           │
-│    - Базова генерація: client-side (WASM)                       │
-│    - ML-покращення: server-side API                             │
+│  Повністю client-side (TypeScript)                              │
+│  7 мелодичних стратегій (src/generation/strategies.ts)          │
+│  Scoring: мелодична плавність + playability + loop smoothness   │
+│  Без серверних запитів, без ML                                  │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                      BACKEND (якщо потрібен)                    │
+│                       ХОСТИНГ                                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  API:          FastAPI / Express                                │
-│  Database:     PostgreSQL (users, saved phrases)                │
-│  Auth:         Supabase / Firebase Auth                         │
-│  Storage:      S3 / Cloudflare R2 (аудіо файли)                 │
-│  Hosting:      Vercel / Railway / Fly.io                        │
+│  GitHub Pages (статичний хостинг)                               │
+│  CI/CD: GitHub Actions (.github/workflows/deploy.yml)           │
+│  base URL: /riff_helper/                                        │
+│  Семпли: public/samples/ (~297MB, в репозиторії)                │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -948,7 +942,7 @@ class RiffGenerator:
 - Design: Figma
 - Project: Linear / Notion
 - Code: GitHub
-- CI/CD: GitHub Actions + Vercel
+- CI/CD: GitHub Actions + GitHub Pages
 
 ---
 

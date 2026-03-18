@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jam Master MVP</title>
+    <style>
+      body {
+        margin: 0;
+        background: #050505;
+        color: white;
+        font-family: sans-serif;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+      .controls {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 10;
+      }
+      button {
+        padding: 15px 30px;
+        border-radius: 30px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+        transition: 0.3s;
+      }
+      #startBtn {
+        background: #00ff88;
+        color: #050505;
+      }
+      #stopBtn {
+        background: #ff4444;
+        color: white;
+        display: none;
+      }
+      button:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+      .stats {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #333;
+      }
+      .hint {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #666;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="hint" class="hint">Натисніть "Почати", щоб активувати мікрофон</div>
+
+    <div class="stats">
+      <div>Енергія: <span id="energyVal">0.00</span></div>
+      <div>Запис: <span id="timer">0.0</span>с</div>
+    </div>
+
+    <div class="stats" style="top: 80px">
+      <div style="font-size: 24px; color: #00ff88">Нота: <span id="currentNoteDisplay">---</span></div>
+      <hr />
+      <div id="notesList" style="font-size: 14px; color: #aaa"></div>
+    </div>
+
+    <canvas id="visualizer"></canvas>
+
+    <div class="controls">
+      <button id="startBtn">ПОЧАТИ ДЖЕМ</button>
+      <button id="stopBtn">ЗУПИНИТИ ТА ЗБЕРЕГТИ</button>
+    </div>
+
+    <script>
+      let audioContext, analyser, dataArray, animationId
+      let isRecording = false
+      let sessionLog = []
+
+      const canvas = document.getElementById('visualizer')
+      const ctx = canvas.getContext('2d')
+      const startBtn = document.getElementById('startBtn')
+      const stopBtn = document.getElementById('stopBtn')
+      const energyVal = document.getElementById('energyVal')
+      const timerDisplay = document.getElementById('timer')
+      const hint = document.getElementById('hint')
+
+      // Налаштування екрану
+      function resize() {
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+      }
+      window.onresize = resize
+      resize()
+
+      // Головна функція малювання (тепер вона точно на місці)
+      function draw(energy) {
+        // Очищення екрану з невеликим шлейфом
+        ctx.fillStyle = 'rgba(5, 5, 5, 0.15)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+        const centerX = canvas.width / 2
+        const centerY = canvas.height / 2
+
+        // Базовий радіус + залежність від енергії
+        const baseRadius = Math.min(canvas.width, canvas.height) * 0.15
+        const targetRadius = baseRadius + energy * baseRadius * 1.5
+
+        // Створення градієнтного сяйва
+        const grad = ctx.createRadialGradient(centerX, centerY, baseRadius * 0.5, centerX, centerY, targetRadius)
+        grad.addColorStop(0, `hsla(${140 + energy * 60}, 100%, 50%, 0.8)`) // Колір змінюється від зеленого до жовтого
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, targetRadius, 0, Math.PI * 2)
+        ctx.fillStyle = grad
+        ctx.fill()
+
+        // Біла обводка ядра
+        ctx.beginPath()
+        ctx.arc(centerX, centerY, baseRadius + energy * 10, 0, Math.PI * 2)
+        ctx.strokeStyle = 'white'
+        ctx.lineWidth = 2
+        ctx.stroke()
+      }
+
+      // Словник для перетворення частоти в ноту
+      const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+      function frequencyToNote(frequency) {
+        if (frequency <= 0) return null
+        // Формула: n = 12 * log2(f / 440) + 69
+        const n = Math.round(12 * Math.log2(frequency / 440) + 69)
+        const octave = Math.floor(n / 12) - 1
+        const noteName = NOTE_NAMES[n % 12]
+        return noteName + octave
+      }
+
+      // Змінні для відстеження поточної ноти
+      let currentNote = null
+      let noteStartTime = 0
+      let notesHistory = []
+
+      function visualize() {
+        if (!isRecording) return
+        animationId = requestAnimationFrame(visualize)
+
+        analyser.getByteFrequencyData(dataArray)
+
+        // 1. Аналіз енергії (як раніше)
+        let sum = 0
+        let maxVal = 0
+        let maxIndex = 0
+
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i]
+          // Шукаємо індекс пікової частоти
+          if (dataArray[i] > maxVal) {
+            maxVal = dataArray[i]
+            maxIndex = i
+          }
+        }
+
+        let average = sum / dataArray.length
+        let normalizedEnergy = average / 50
+
+        // 2. Детекція ноти
+        // Розрахунок частоти: index * (SampleRate / FFT_Size)
+        const nyquist = audioContext.sampleRate / 2
+        const frequency = maxIndex * (audioContext.sampleRate / analyser.fftSize)
+
+        // Визначаємо ноту тільки якщо звук достатньо гучний
+        let detectedNote = maxVal > 100 ? frequencyToNote(frequency) : null
+
+        if (detectedNote !== currentNote) {
+          const now = audioContext.currentTime
+
+          // Якщо попередня нота закінчилася, зберігаємо її
+          if (currentNote && noteStartTime > 0) {
+            const duration = now - noteStartTime
+            if (duration > 0.1) {
+              // Ігноруємо надто короткі шуми
+              notesHistory.push({
+                note: currentNote,
+                start: noteStartTime.toFixed(2),
+                duration: duration.toFixed(2),
+                energy: normalizedEnergy.toFixed(2),
+              })
+              renderNotesList()
+            }
+          }
+
+          currentNote = detectedNote
+          noteStartTime = now
+        }
+
+        // Оновлення UI
+        document.getElementById('energyVal').innerText = normalizedEnergy.toFixed(2)
+        document.getElementById('currentNoteDisplay').innerText = currentNote || '---'
+        timerDisplay.innerText = audioContext.currentTime.toFixed(1)
+
+        draw(normalizedEnergy)
+      }
+
+      // Функція для відображення списку останніх нот
+      function renderNotesList() {
+        const listEl = document.getElementById('notesList')
+        if (!listEl) return
+
+        // Беремо останні 5 нот
+        const lastNotes = notesHistory.slice(-5).reverse()
+        listEl.innerHTML = lastNotes
+          .map(n => `<div style="opacity: ${n.duration * 0.5}"><b>${n.note}</b> (${n.duration}s)</div>`)
+          .join('')
+      }
+
+      startBtn.onclick = async () => {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)()
+          if (audioContext.state === 'suspended') await audioContext.resume()
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: false, noiseSuppression: false },
+          })
+
+          const source = audioContext.createMediaStreamSource(stream)
+          analyser = audioContext.createAnalyser()
+          analyser.fftSize = 256
+          analyser.smoothingTimeConstant = 0.7 // Плавність реакції
+          source.connect(analyser)
+
+          dataArray = new Uint8Array(analyser.frequencyBinCount)
+
+          isRecording = true
+          startBtn.style.display = 'none'
+          stopBtn.style.display = 'block'
+          hint.style.display = 'none'
+
+          visualize()
+        } catch (err) {
+          console.error(err)
+          alert('Помилка доступу. Будь ласка, запустіть через локальний сервер (Live Server).')
+        }
+      }
+
+      stopBtn.onclick = () => {
+        isRecording = false
+        cancelAnimationFrame(animationId)
+
+        const blob = new Blob([JSON.stringify(sessionLog)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'jam_session.json'
+        a.click()
+
+        setTimeout(() => location.reload(), 500)
+      }
+    </script>
+  </body>
+</html>
