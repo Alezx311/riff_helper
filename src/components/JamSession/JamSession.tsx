@@ -6,6 +6,7 @@ import { Beat, FretNote } from '../../types';
 import { useJamAudio, JamNote } from './useJamAudio';
 import { JamFretboard } from './JamFretboard';
 import { AudioDebugPanel } from './AudioDebugPanel';
+import { JamAnalysis } from './JamAnalysis';
 import './JamSession.css';
 
 function formatTime(s: number) {
@@ -254,6 +255,11 @@ export function JamSession({ onSwitchToMain }: Props) {
 
       {/* Fretboard – read-only, shows detected note + scale notes */}
       <JamFretboard activeMidi={currentMidi} scaleNotes={scaleNotes} />
+
+      {/* Key/Scale analysis — visible after stopping */}
+      {!isRecording && notesHistory.length > 0 && (
+        <JamAnalysis notes={notesHistory} />
+      )}
 
       {/* Note history */}
       {notesHistory.length > 0 && (

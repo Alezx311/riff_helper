@@ -1,5 +1,6 @@
 import { useAppState } from '../../state/AppContext';
 import { NOTE_NAMES, SCALE_NAMES, TUNING_NAMES, STYLE_NAMES } from '../../constants/music';
+import { KeyScaleDetector } from './KeyScaleDetector';
 
 export function Controls() {
   const { state, dispatch } = useAppState();
@@ -74,6 +75,8 @@ export function Controls() {
           <option value={0.0625}>1/16</option>
         </select>
       </div>
+
+      <KeyScaleDetector />
     </div>
   );
 }

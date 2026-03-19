@@ -241,9 +241,82 @@
   margin-top: 1px;
 }
 
+/* Jam Analysis panel */
+.jam-analysis {
+  padding: 12px 24px 16px;
+  background: #0d1525;
+  border-top: 1px solid #0f3460;
+}
+.jam-analysis-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+.jam-analysis-title {
+  font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+}
+.jam-analysis-count { font-size: 0.65rem; color: #444; }
+.jam-analysis-hint { font-size: 0.6rem; color: #3a3a55; }
+
+.jam-analysis-matches {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px;
+}
+.jam-am-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px; border-radius: 6px; cursor: pointer;
+  background: rgba(15,52,96,0.4); border: 1px solid #0f3460;
+  transition: all 0.15s;
+}
+.jam-am-row:hover { border-color: #533483; background: rgba(83,52,131,0.15); }
+.jam-am-row.jam-am-selected { border-color: #7a5fb5; background: rgba(83,52,131,0.25); }
+.jam-am-name { font-size: 0.78rem; font-weight: 600; color: #c8c8e0; }
+.jam-am-extra { font-size: 0.6rem; color: #555; }
+.jam-am-apply {
+  font-size: 0.6rem; padding: 1px 7px; background: transparent;
+  border: 1px solid #533483; color: #b8a9c9; border-radius: 4px; cursor: pointer;
+}
+.jam-am-apply:hover { background: #e94560; border-color: #e94560; color: white; }
+
+/* Expanded detail */
+.jam-analysis-detail {
+  background: rgba(15,52,96,0.25); border: 1px solid #0f3460;
+  border-radius: 8px; padding: 10px 12px; margin-top: 4px;
+}
+.jam-detail-title {
+  font-size: 0.62rem; color: #666; text-transform: uppercase;
+  letter-spacing: 0.8px; font-weight: 600; margin-bottom: 8px;
+}
+.jam-detail-title-prog { margin-top: 12px; }
+
+.jam-chords-row {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 2px;
+}
+.jam-chord {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 4px 8px; border-radius: 6px; min-width: 46px;
+  border: 1px solid transparent;
+}
+.jam-chord-major    { background: rgba(76,175,80,0.1);  border-color: rgba(76,175,80,0.25); }
+.jam-chord-minor    { background: rgba(83,52,131,0.2);  border-color: rgba(83,52,131,0.35); }
+.jam-chord-diminished { background: rgba(233,69,96,0.1); border-color: rgba(233,69,96,0.25); }
+.jam-chord-augmented  { background: rgba(255,152,0,0.1); border-color: rgba(255,152,0,0.25); }
+
+.jam-chord-roman { font-size: 0.6rem; color: #888; font-style: italic; }
+.jam-chord-name  { font-size: 0.85rem; font-weight: 700; color: #e0e0e0; }
+.jam-chord-quality { font-size: 0.5rem; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
+
+.jam-progressions { display: flex; flex-direction: column; gap: 5px; }
+.jam-prog-row {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  padding: 4px 8px; border-radius: 5px; background: rgba(0,0,0,0.2);
+}
+.jam-prog-style   { font-size: 0.6rem; color: #533483; font-weight: 600; min-width: 90px; }
+.jam-prog-chords  { font-size: 0.82rem; font-weight: 700; color: #c8c8e0; }
+.jam-prog-numerals { font-size: 0.62rem; color: #555; font-style: italic; }
+
 @media (max-width: 768px) {
   .jam-controls { padding: 8px 10px; gap: 8px; }
   .jam-note-panel { padding: 8px 10px; }
   .jam-canvas { height: 150px; }
   .jam-history { padding: 8px 10px 12px; }
+  .jam-analysis { padding: 8px 10px 12px; }
+  .jam-prog-style { min-width: 70px; }
 }
