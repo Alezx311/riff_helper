@@ -114,3 +114,8 @@ export function scheduleDrums(pattern: DrumPattern, startTime: number, tempo: nu
 export function getAudioContext(): AudioContext {
   return getCtx();
 }
+
+export function resumeDrumContext() {
+  const ctx = getCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+}

@@ -1,11 +1,12 @@
 import { useCallback, useRef, useEffect } from 'react';
 import type { Beat, DrumPattern, InstrumentType, MixerState } from '../types';
 import { sampleEngine, midiToToneNote } from './SampleEngine';
-import { scheduleDrums, getAudioContext, applyDrumMixer } from './DrumEngine';
+import { scheduleDrums, getAudioContext, applyDrumMixer, resumeDrumContext } from './DrumEngine';
 import { DRUM_STEPS } from '../constants/music';
 
-// Lazy Tone reference
+// Lazy Tone reference — start loading immediately for iOS gesture timing
 let ToneModule: typeof import('tone') | null = null;
+import('tone').then(t => { ToneModule = t; });
 async function getTone() {
   if (!ToneModule) ToneModule = await import('tone');
   return ToneModule;
@@ -15,6 +16,25 @@ export function useAudioEngine(mixer: MixerState, tempo: number) {
   const loopTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const playingRef = useRef(false);
   const initedRef = useRef(false);
+
+  // iOS unlock: resume both audio contexts on first touch/click within a user gesture
+  useEffect(() => {
+    let unlocked = false;
+    const unlock = () => {
+      if (unlocked) return;
+      unlocked = true;
+      ToneModule?.start();
+      resumeDrumContext();
+      document.removeEventListener('touchstart', unlock, true);
+      document.removeEventListener('click', unlock, true);
+    };
+    document.addEventListener('touchstart', unlock, true);
+    document.addEventListener('click', unlock, true);
+    return () => {
+      document.removeEventListener('touchstart', unlock, true);
+      document.removeEventListener('click', unlock, true);
+    };
+  }, []);
 
   // Apply mixer settings only after audio has been initialized
   useEffect(() => {
